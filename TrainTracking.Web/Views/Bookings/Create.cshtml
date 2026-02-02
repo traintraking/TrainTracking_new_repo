@@ -1,0 +1,289 @@
+@model TrainTracking.Domain.Entities.Booking
+@{
+    // تأكد من جلب المقاعد المحجوزة من الـ ViewBag
+    var takenSeats = (List<int>)ViewBag.TakenSeats ?? new List<int>();
+}
+
+<style>
+    /* الاستايل الخاص بك بدون أي تعديل */
+    .train-container {
+        max-height: 600px;
+        overflow-y: auto;
+        padding: 20px;
+        background: #f0f2f5;
+        border-radius: 20px;
+    }
+
+    .coach {
+        background: white;
+        border: 2px solid #dee2e6;
+        border-radius: 15px;
+        margin-bottom: 30px;
+        padding: 20px;
+        position: relative;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+        .coach::before, .coach::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            width: 40px;
+            height: 10px;
+            background: #adb5bd;
+            transform: translateX(-50%);
+        }
+
+        .coach::before {
+            top: -12px;
+            border-radius: 5px 5px 0 0;
+        }
+
+        .coach::after {
+            bottom: -12px;
+            border-radius: 0 0 5px 5px;
+        }
+
+    .coach-header {
+        text-align: center;
+        margin-bottom: 15px;
+        color: #6c757d;
+        font-weight: bold;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .seat-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr) 40px repeat(2, 1fr);
+        gap: 10px;
+        justify-items: center;
+    }
+
+    .aisle {
+        grid-column: 3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #dee2e6;
+        font-size: 0.8rem;
+    }
+
+    .seat {
+        width: 45px;
+        height: 45px;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-weight: 600;
+        background: #fff;
+        font-size: 0.9rem;
+    }
+
+        .seat:hover:not(.taken) {
+            border-color: #0d6efd;
+            color: #0d6efd;
+            background: #f0f7ff;
+            transform: scale(1.1);
+        }
+
+        .seat.selected {
+            background: #0d6efd;
+            color: white;
+            border-color: #0d6efd;
+            box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
+        }
+
+        .seat.taken {
+            background: #f8f9fa;
+            color: #dee2e6;
+            cursor: not-allowed;
+            border-style: dashed;
+        }
+
+    .legend {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        padding: 15px;
+        background: white;
+        border-radius: 50px;
+        margin-bottom: 25px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+    }
+
+    .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 4px;
+    }
+</style>
+
+@if (Model.Trip.Status == TripStatus.Completed)
+{
+    <div class="alert alert-danger text-center">
+        🚫 هذه الرحلة مكتملة العدد
+    </div>
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="legend">
+                <div class="legend-item"><div class="dot" style="border: 2px solid #e9ecef;"></div> متاح</div>
+                <div class="legend-item"><div class="dot" style="background: #0d6efd;"></div> اختيارك</div>
+                <div class="legend-item"><div class="dot" style="background: #f8f9fa; border: 1px dashed #dee2e6;"></div> محجوز</div>
+                <div class="legend-item"><span class="badge bg-warning text-dark">VIP (2x)</span></div>
+                <div class="legend-item"><span class="badge bg-info text-dark">First Class (1.5x)</span></div>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4 rounded-4 overflow-hidden">
+                <div class="card-header bg-primary text-white py-3">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> تفاصيل المقطع المختار</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center text-center">
+                        <div class="col-5">
+                            <div class="fw-bold text-primary fs-5">@ViewBag.FromStation.Name</div>
+                            <div class="text-muted small">@(((DateTimeOffset)ViewBag.SegmentDepartureTime).ToString("yyyy-MM-dd"))</div>
+                            <div class="fs-4 fw-bold">@(((DateTimeOffset)ViewBag.SegmentDepartureTime).ToString("HH:mm"))</div>
+                        </div>
+                        <div class="col-2">
+                            <i class="fas fa-long-arrow-alt-left fa-2x text-muted"></i>
+                        </div>
+                        <div class="col-5">
+                            <div class="fw-bold text-danger fs-5">@ViewBag.ToStation.Name</div>
+                            <div class="text-muted small">@(((DateTimeOffset)ViewBag.SegmentArrivalTime).ToString("yyyy-MM-dd"))</div>
+                            <div class="fs-4 fw-bold">@(((DateTimeOffset)ViewBag.SegmentArrivalTime).ToString("HH:mm"))</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="train-container">
+                @for (int c = 0; c < ViewBag.totalSeats / 20; c++)
+                {
+                    // تحديد نوع العربة ومعامل السعر
+                    string coachType = "Regular";
+                    double multiplier = 1.0;
+                    string coachClass = "";
+
+                    if (c == 0) { coachType = "VIP (Double Price)"; multiplier = 2.0; coachClass = "border-warning shadow"; }
+                    else if (c == 1) { coachType = "First Class (1.5x Price)"; multiplier = 1.5; coachClass = "border-info"; }
+
+                    <div class="coach @coachClass" data-multiplier="@multiplier.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                        <div class="coach-header @(c == 0 ? "text-warning" : (c == 1 ? "text-info" : ""))">
+                            عربة @(c + 1) - @coachType
+                        </div>
+                        <div class="seat-grid">
+
+                            @* s => number of seats *@
+                            @for (int s = 1; s <= 20; s++)
+                            {
+                                int seatNum = (c * 20) + s;
+                                bool isTaken = takenSeats.Contains(seatNum);
+
+                                <div class="seat @(isTaken ? "taken" : "") @(c == 0 ? "border-warning" : (c == 1 ? "border-info" : ""))"
+                                     data-num="@seatNum"
+                                     data-multiplier="@multiplier.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                     onclick="selectSeat(this, @seatNum)">
+                                    @seatNum
+                                </div>
+
+                                @if (s % 2 == 0 && s % 4 != 0)
+                                {
+                                    <div class="aisle"><i class="fas fa-ellipsis-v"></i></div>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 p-4 sticky-top" style="top: 20px; border-radius: 15px;">
+                <h5 class="fw-bold mb-4 text-secondary">بيانات الحجز</h5>
+                <form asp-action="Create" method="post" id="bookingForm">
+                    <input type="hidden" asp-for="TripId" />
+                    <input type="hidden" asp-for="FromStationId" />
+                    <input type="hidden" asp-for="ToStationId" />
+                    <input type="hidden" asp-for="Price" id="unitPrice" value="@Model.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" />                    <input type="hidden" name="selectedSeats" id="selectedSeatsInput" />
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold" style="color:#6c757d;">اسم المسافر</label>
+                        <input asp-for="PassengerName" class="form-control" placeholder="الاسم الكامل" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold" style="color:#6c757d;">رقم الهاتف</label>
+                        <input asp-for="PassengerPhone" class="form-control" placeholder="00000000" required />
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 mb-4">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">المقاعد:</span>
+                            <span id="txtSeats" class="fw-bold text-primary">--</span>
+                        </div>
+                        <div class="d-flex justify-content-between border-top pt-2">
+                            <span class="fw-bold">الإجمالي:</span>
+                            <span class="fw-bold text-success">KD <span id="txtTotal">0.000</span></span>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm" id="btnSubmit" disabled>
+                        تأكيد الحجز
+                    </button>
+                </form>
+                <div asp-validation-summary="All" class="text-danger"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedSeats = [];
+    const unitPriceElement = document.getElementById('unitPrice');
+    const basePrice = parseFloat(unitPriceElement.value) || 0;
+    console.log("Base Price Detected:", basePrice);
+    function selectSeat(el, num) {
+        if (el.classList.contains('taken')) return;
+        const multiplier = parseFloat(el.getAttribute('data-multiplier'));
+        const index = selectedSeats.findIndex(s => s.num === num);
+        if (index > -1) {
+            selectedSeats.splice(index, 1);
+            el.classList.remove('selected');
+        } else {
+            if (selectedSeats.length >= 3) {
+                alert("الحد الأقصى هو 3 مقاعد");
+                return;
+            }
+            selectedSeats.push({ num: num, mult: multiplier });
+            el.classList.add('selected');
+        }
+        updateBookingInfo();
+    }
+    function updateBookingInfo() {
+        const seatNumbers = selectedSeats.map(s => s.num);  // هنا التصحيح
+        document.getElementById('txtSeats').innerText = seatNumbers.length > 0 ? seatNumbers.join(', ') : "--";
+        document.getElementById('selectedSeatsInput').value = seatNumbers.join(',');
+        let total = 0;
+        selectedSeats.forEach(s => {
+            total += (basePrice * s.mult);
+        });
+        document.getElementById('txtTotal').innerText = total.toFixed(3);
+        document.getElementById('btnSubmit').disabled = selectedSeats.length === 0;
+    }
+</script>

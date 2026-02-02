@@ -1,0 +1,170 @@
+﻿using Microsoft.EntityFrameworkCore;
+using TrainTracking.Infrastructure.Persistence;
+using TrainTracking.Application.Interfaces;
+using TrainTracking.Infrastructure.Repositories;
+using TrainTracking.Web.Hubs;
+using Microsoft.AspNetCore.Identity;
+using QuestPDF.Infrastructure;
+using TrainTracking.Web.Services;
+using TrainTracking.Infrastructure.Services;
+using TrainTracking.Infrastructure.Configuration;
+using TrainTracking.Application.Services;
+
+try 
+{
+    Console.WriteLine("[KuwGo] Global Start sequence initiated...");
+    
+    // QuestPDF License - This triggers native lib loading (SkiaSharp)
+    Console.WriteLine("[KuwGo] Setting QuestPDF License (Community)...");
+    QuestPDF.Settings.License = LicenseType.Community;
+    Console.WriteLine("[KuwGo] QuestPDF License set successfully.");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    // Add services to the container.
+    builder.Services.AddControllersWithViews();
+    builder.Services.AddSignalR();
+
+    // Railway Port Handling
+    if (!builder.Environment.IsDevelopment())
+    {
+        var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+        Console.WriteLine($"[KuwGo] Binding to http://0.0.0.0:{port}");
+        builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
+    }
+
+    Console.WriteLine($"[KuwGo] Environment: {builder.Environment.EnvironmentName}");
+
+    // Identity Configuration
+    builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredLength = 6;
+    })
+    .AddEntityFrameworkStores<TrainTrackingDbContext>()
+    .AddDefaultTokenProviders();
+
+    // Cookie & Session Optimization for Railway
+    builder.Services.ConfigureApplicationCookie(options => {
+        options.Cookie.HttpOnly = true;
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.SlidingExpiration = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
+    });
+
+    // Configure SQLite (Standard Context - Pooling can cause issues with Migrations/SQLite)
+    var dbPath = "new.db"; // اسم جديد للقاعدة
+    builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
+        options.UseSqlite($"Data Source={dbPath}"));
+    //local db
+    //builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
+    //options.UseSqlServer(
+    //    builder.Configuration.GetConnectionString("DefaultConnection")
+    //));
+
+
+    builder.Services.AddScoped<ITrainRepository, TrainRepository>();
+    builder.Services.AddScoped<ITripRepository, TripRepository>();
+    builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+    builder.Services.AddScoped<IStationRepository, StationRepository>();
+    builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+    builder.Services.AddScoped<IDateTimeService, DateTimeService>();
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(typeof(TrainTracking.Application.Features.Trips.Queries.GetUpcomingTrips.GetUpcomingTripsQuery).Assembly));
+    builder.Services.AddAutoMapper(typeof(TrainTracking.Application.Mappings.MappingProfile).Assembly);
+    builder.Services.AddHostedService<TripCleanupService>();
+    builder.Services.Configure<TwilioSettings>(builder.Configuration.GetSection("TwilioSettings"));
+    builder.Services.AddHttpClient<ISmsService, TwilioSmsService>();
+    builder.Services.AddScoped<TicketGenerator>();
+    builder.Services.AddScoped<IEmailService, MockEmailService>();
+    builder.Services.AddScoped<ITripService, TripService>();
+    builder.Services.AddHostedService<TripStatusBackgroundService>();
+    builder.Services.AddScoped<IVirtualSegmentService, VirtualSegmentService>();
+
+
+
+    // Localization Services
+    builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+    // Custom Model Binder for Invariant Decimal Parsing
+    builder.Services.AddControllersWithViews(options =>
+    {
+        options.ModelBinderProviders.Insert(0, new InvariantDecimalModelBinderProvider());
+    })
+    .AddViewLocalization()
+    .AddDataAnnotationsLocalization();
+    // Configure Supported Cultures
+    builder.Services.Configure<RequestLocalizationOptions>(options =>
+    {
+        var supportedCultures = new[] { "ar-KW", "en-US" };
+        options.SetDefaultCulture(supportedCultures[0])
+               .AddSupportedCultures(supportedCultures)
+               .AddSupportedUICultures(supportedCultures);
+        
+        options.RequestCultureProviders.Insert(0, new Microsoft.AspNetCore.Localization.CookieRequestCultureProvider());
+    });
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline.
+    if (!app.Environment.IsDevelopment())
+    {
+        app.UseExceptionHandler("/Home/Error");
+        app.UseHsts();
+    }
+
+    // Enable Localization Middleware
+    app.UseRequestLocalization();
+
+    app.UseStaticFiles();
+    app.UseRouting();
+    app.UseAuthentication();
+    app.UseAuthorization();
+
+    app.MapControllerRoute(
+        name: "default",
+        pattern: "{controller=Home}/{action=Index}/{id?}");
+    app.MapHub<TripHub>("/tripHub");
+
+    // Initialize Database and Seed Essential Data (NON-BLOCKING or explicitly caught)
+    Console.WriteLine("[KuwGo] Initializing database and essential data...");
+    using (var scope = app.Services.CreateScope())
+    {
+        var services = scope.ServiceProvider;
+        try
+        {
+            var context = services.GetRequiredService<TrainTrackingDbContext>();
+            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            
+            // Revert to async call but wait to ensure completion for the first user
+            await DbInitializer.Seed(context, userManager, roleManager);
+            
+            Console.WriteLine("[KuwGo] Database initialization completed.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[KuwGo] ERROR during database initialization: {ex.Message}");
+            if (ex.InnerException != null) Console.WriteLine($"[KuwGo] INNER: {ex.InnerException.Message}");
+        }
+    }
+
+    Console.WriteLine("[KuwGo] STARTING SERVER...");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Console.WriteLine("=================================================");
+    Console.WriteLine("[KuwGo] FATAL CRASH DURING STARTUP");
+    Console.WriteLine($"[KuwGo] ERROR: {ex.Message}");
+    Console.WriteLine($"[KuwGo] STACK TRACE: {ex.StackTrace}");
+    if (ex.InnerException != null)
+    {
+        Console.WriteLine($"[KuwGo] INNER ERROR: {ex.InnerException.Message}");
+    }
+    Console.WriteLine("=================================================");
+    throw;
+}

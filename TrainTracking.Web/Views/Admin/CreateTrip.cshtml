@@ -1,0 +1,457 @@
+@model TrainTracking.Domain.Entities.Trip
+@using TrainTracking.Domain.Entities
+@{
+    bool isEdit = Model?.Id != Guid.Empty && Model?.Id != null;
+    ViewData["Title"] = isEdit ? "تعديل رحلة" : "إضافة رحلة جديدة";
+}
+
+<style>
+    .create-trip-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .trip-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .trip-header {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        padding: 2rem;
+        color: white;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+        .trip-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+        }
+
+        .trip-header p {
+            margin: 0.5rem 0 0 0;
+            opacity: 0.95;
+            font-size: 0.95rem;
+        }
+
+    .trip-body {
+        padding: 2rem;
+    }
+
+    .section-divider {
+        margin: 2rem 0;
+        border: 0;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+        .section-title i {
+            color: #0d6efd;
+            font-size: 1.25rem;
+        }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        color: var(--muted-text);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-control, .form-select {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.2s;
+        background: var(--input-bg);
+        color: var(--input-text);
+    }
+
+        .form-control:focus, .form-select:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+        }
+
+    .info-box {
+        background: #e7f3ff;
+        border-left: 4px solid #0d6efd;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+        .info-box i {
+            color: #0d6efd;
+            margin-left: 0.5rem;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #2c5282;
+            font-size: 0.9rem;
+        }
+
+    .calc-feedback {
+        background: #d1fae5;
+        border: 1px solid #6ee7b7;
+        color: #065f46;
+        padding: 0.75rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        display: none;
+        font-size: 0.9rem;
+    }
+
+        .calc-feedback i {
+            color: #059669;
+            margin-left: 0.5rem;
+        }
+
+    .btn-primary-custom {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        width: 100%;
+    }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+        }
+
+    .btn-secondary-custom {
+        background: var(--card-bg);
+        color: var(--muted-text);
+        border: 2px solid var(--border-color);
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.05rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+        .btn-secondary-custom:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+            color: #4a5568;
+        }
+
+    .calculating {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    /* Dark Mode Overrides for Specific Elements */
+    [data-theme="dark"] .info-box {
+        background: rgba(13, 110, 253, 0.1);
+        border-left-color: #0d6efd;
+    }
+
+        [data-theme="dark"] .info-box p {
+            color: #e2e8f0;
+        }
+
+    [data-theme="dark"] .calc-feedback {
+        background: rgba(16, 185, 129, 0.1);
+        border-color: #059669;
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] .trip-header {
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+</style>
+
+<div class="container py-4">
+    <div class="create-trip-container">
+        <div class="trip-card">
+            <div class="trip-header">
+                <h2>
+                    <i class="fas @(isEdit ? "fa-edit" : "fa-plus-circle")"></i>
+                    @ViewData["Title"]
+                </h2>
+                <p>قم بإدخال تفاصيل الرحلة بدقة - سيتم حساب وقت الوصول تلقائياً</p>
+            </div>
+
+            <div class="trip-body">
+                <form asp-action="@(isEdit ? "EditTrip" : "CreateTrip")" method="post">
+
+                    @if (isEdit)
+                    {
+                        <input type="hidden" asp-for="Id" />
+                    }
+
+                    <!-- Train Selection -->
+                    <div class="section-title">
+                        <i class="fas fa-train"></i>
+                        <span>اختيار القطار</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label class="form-label">القطار</label>
+                                <select asp-for="TrainId" class="form-select" required>
+                                    <option value="">-- اختر القطار --</option>
+                                    @foreach (var train in (List<Train>)ViewBag.Trains)
+                                    {
+                                        <option value="@train.Id">@train.TrainNumber - @train.Type (@train.TotalSeats مقعد)</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="form-label">حالة الرحلة</label>
+                                <select asp-for="Status" class="form-select" asp-items="Html.GetEnumSelectList<TripStatus>()"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+                    <!-- Price of the trip -->
+                    <div class="section-title">
+                        <i class="fa-dollar-sign"></i>
+                        <span>سعر الرحلة</span>
+                    </div>
+
+                    <div class="info-box">
+                        <p>
+                            <i class="fas fa-magic"></i>
+                            سيتم حساب سعر الرحلة الأساسي تلقائياً بناءً على المسافة بين المحطات (0.2 KD لكل كم، مع زيادة لكل محطة إضافية إذا لزم).
+                        </p>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Price" class="form-label fw-bold">سعر الرحلة الأساسي</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-success fw-bold">KD</span>
+                            <input asp-for="Price"
+                                   class="form-control"
+                                   type="number"
+                                   step="0.001"
+                                   min="0"
+                                   placeholder="0.000"
+                                   id="tripPrice"
+                                   readonly />
+                        </div>
+                        <div class="form-text text-muted">سيتم حساب أسعار VIP والدرجة الأولى بناءً على هذا السعر.</div>
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                        <div id="priceFeedback" class="calc-feedback" style="display: none;">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="priceMessage"></span>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Route -->
+                    <div class="section-title">
+                        <i class="fas fa-route"></i>
+                        <span>مسار الرحلة</span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-map-marker-alt text-success"></i>
+                                    محطة المغادرة
+                                </label>
+                                <select asp-for="FromStationId" id="fromStation" class="form-select" required>
+                                    <option value="">-- اختر محطة المغادرة --</option>
+                                    @foreach (var station in (List<Station>)ViewBag.Stations)
+                                    {
+                                        <option value="@station.Id">@station.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-map-marker-alt text-danger"></i>
+                                    محطة الوصول
+                                </label>
+                                <select asp-for="ToStationId" id="toStation" class="form-select" required>
+                                    <option value="">-- اختر محطة الوصول --</option>
+                                    @foreach (var station in (List<Station>)ViewBag.Stations)
+                                    {
+                                        <option value="@station.Id">@station.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Timing -->
+                    <div class="section-title">
+                        <i class="fas fa-clock"></i>
+                        <span>التوقيت</span>
+                    </div>
+
+                    <div class="info-box">
+                        <p>
+                            <i class="fas fa-magic"></i>
+                            سيتم حساب وقت الوصول تلقائياً بناءً على المسافة الفعلية وسرعة 300 كم/س
+                        </p>
+                        <hr />
+                        <p>
+                            <i class="fas fa-magic"></i>
+                            غير مسموح بانشاء رحلات في نفس اليوم علي الاقل يجب ان يكون هناك يوم علي معاد الرحله
+                        </p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">تاريخ ووقت المغادرة</label>
+                                <input asp-for="DepartureTime" type="datetime-local" id="departureTime" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">تاريخ ووقت الوصول المتوقع</label>
+                                <input asp-for="ArrivalTime" type="datetime-local" id="arrivalTime" class="form-control" required readonly />
+                                <div id="calcFeedback" class="calc-feedback">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span id="calcMessage"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Optional -->
+                    <div class="section-title">
+                        <i class="fas fa-cog"></i>
+                        <span>إعدادات إضافية (اختياري)</span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="form-label">تأخير (بالدقائق)</label>
+                                <input asp-for="DelayMinutes" type="number" class="form-control" placeholder="0" min="0" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Actions -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <button type="submit" class="btn-primary-custom">
+                                <i class="fas fa-save"></i>
+                                @(isEdit ? "حفظ التغييرات" : "إضافة الرحلة")
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <a asp-action="Trips" class="btn-secondary-custom" style="width: 100%;">
+                                <i class="fas fa-times"></i>
+                                إلغاء
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+
+    <script>
+        $(document).ready(function() {
+            function calculateArrivalAndPrice() {
+                const fromId = $('#fromStation').val();
+                const toId = $('#toStation').val();
+                const departure = $('#departureTime').val();
+
+                console.log('Calculation Triggered:', { fromId, toId, departure });
+
+                if (fromId && toId && departure && fromId !== toId) {
+                    console.log('Valid inputs, sending AJAX...');
+                    $('#arrivalTime, #tripPrice').addClass('calculating');
+
+                    $.ajax({
+                        url: '@Url.Action("GetCalculatedArrivalAndPrice", "Admin")',
+                        type: 'GET',
+                        data: {
+                            fromStationId: fromId,
+                            toStationId: toId,
+                            departureTime: departure
+                        },
+                        success: function(data) {
+                            console.log('Calculation Result:', data);
+                            $('#arrivalTime, #tripPrice').removeClass('calculating');
+
+                            if (data.success) {
+                                $('#arrivalTime').val(data.arrivalTime);
+                                $('#calcMessage').text('تم الحساب تلقائياً - الوصول المتوقع: ' + data.displayTime);
+                                $('#calcFeedback').fadeIn();
+
+                                $('#tripPrice').val(data.price.toFixed(3));
+                                $('#priceMessage').text('تم الحساب تلقائياً - السعر: ' + data.price.toFixed(3) + ' KD');
+                                $('#priceFeedback').fadeIn();
+                            } else {
+                                console.warn('Calculation failed on server:', data.message);
+                                alert('خطأ في الحساب: ' + data.message);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX Error:', { status, error, response: xhr.responseText });
+                            $('#arrivalTime, #tripPrice').removeClass('calculating');
+                        }
+                    });
+                }
+            }
+
+            $('#fromStation, #toStation, #departureTime').on('change input', function() {
+                calculateArrivalAndPrice();
+            });
+
+            // Initial calculation if editing
+            if ($('#fromStation').val() && $('#toStation').val() && $('#departureTime').val()) {
+                calculateArrivalAndPrice();
+            }
+        });
+    </script>
+}
