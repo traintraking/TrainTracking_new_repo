@@ -72,7 +72,7 @@ public static class DbInitializer
         {
             context.Trains.AddRange(
                 new Train { Id = new Guid("aaaa1111-1111-1111-1111-111111111111"), TrainNumber = "KWT-101", Type = "سريع", TotalSeats = 200 , speed = 120 },
-                new Train { Id = new Guid("aaaa2222-2222-2222-2222-222222222222"), TrainNumber = "KWT-102", Type = "VIP", TotalSeats = 120 , speed = 90 },
+                new Train { Id = new Guid("aaaa2222-2222-2222-2222-222222222222"), TrainNumber = "KWT-102", Type = "VIP", TotalSeats = 120 , speed = 160 },
                 new Train { Id = new Guid("aaaa3333-3333-3333-3333-333333333333"), TrainNumber = "KWT-103", Type = "محلي", TotalSeats = 300 , speed = 150 }
             );
             context.SaveChanges();
