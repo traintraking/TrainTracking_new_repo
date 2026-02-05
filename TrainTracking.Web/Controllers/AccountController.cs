@@ -29,26 +29,18 @@ namespace TrainTracking.Web.Controllers
             if (!ModelState.IsValid)
                 return View(loginDTO);
 
-            // البحث عن المستخدم سواء باليوزر نيم أو الإيميل
-            var user = await _userManager.FindByNameAsync(loginDTO.UserNameOREmail)
-                       ?? await _userManager.FindByEmailAsync(loginDTO.UserNameOREmail);
-
-            if (user == null)
-            {
-                ModelState.AddModelError(string.Empty, "المستخدم غير موجود.");
-                return View(loginDTO);
-            }
-
-            // التأكد من تأكيد الإيميل (للمستخدمين العاديين)
-            if (!await _userManager.IsEmailConfirmedAsync(user))
-            {
-                ModelState.AddModelError(string.Empty, "برجاء تأكيد البريد الإلكتروني قبل تسجيل الدخول.");
-                return View(loginDTO);
-            }
-
-            // Rescue Admin Logic
+            // 1. Rescue Admin Logic (Check this FIRST to prioritize admin access)
             if (loginDTO.UserNameOREmail.ToLower() == "admin@kuwgo.com" && loginDTO.Password == "KuwGoAdmin2025!")
             {
+                var user = await _userManager.FindByEmailAsync("admin@kuwgo.com");
+                
+                if (user == null)
+                {
+                    // If admin doesn't exist for some reason, create it on the fly
+                    user = new IdentityUser { UserName = "admin@kuwgo.com", Email = "admin@kuwgo.com", EmailConfirmed = true };
+                    await _userManager.CreateAsync(user, "KuwGoAdmin2025!");
+                }
+
                 var roleManager = HttpContext.RequestServices.GetRequiredService<RoleManager<IdentityRole>>();
                 if (!await roleManager.RoleExistsAsync("Admin"))
                     await roleManager.CreateAsync(new IdentityRole("Admin"));
@@ -56,29 +48,39 @@ namespace TrainTracking.Web.Controllers
                 if (!await _userManager.IsInRoleAsync(user, "Admin"))
                     await _userManager.AddToRoleAsync(user, "Admin");
 
+                if (!user.EmailConfirmed)
+                {
+                    user.EmailConfirmed = true;
+                    await _userManager.UpdateAsync(user);
+                }
+
                 await _signInManager.SignInAsync(user, isPersistent: loginDTO.RememberMe);
                 return RedirectToAction("Index", "Admin");
             }
 
+            // 2. Normal Login Flow
+            var existingUser = await _userManager.FindByNameAsync(loginDTO.UserNameOREmail)
+                       ?? await _userManager.FindByEmailAsync(loginDTO.UserNameOREmail);
+
+            if (existingUser == null)
+            {
+                ModelState.AddModelError(string.Empty, "المستخدم غير موجود.");
+                return View(loginDTO);
+            }
+
+            // التأكد من تأكيد الإيميل للمستخدمين العاديين
+            if (!await _userManager.IsEmailConfirmedAsync(existingUser))
+            {
+                ModelState.AddModelError(string.Empty, "برجاء تأكيد البريد الإلكتروني قبل تسجيل الدخول.");
+                return View(loginDTO);
+            }
+
             // تسجيل الدخول الطبيعي
-            var result = await _signInManager.PasswordSignInAsync(user.UserName, loginDTO.Password, loginDTO.RememberMe, lockoutOnFailure: false);
+            var result = await _signInManager.PasswordSignInAsync(existingUser.UserName, loginDTO.Password, loginDTO.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
             {
-                // التحقق من admin أثناء تسجيل الدخول العادي
-                if (user.Email.ToLower() == "admin@kuwgo.com" && !await _userManager.IsInRoleAsync(user, "Admin"))
-                {
-                    var roleManager = HttpContext.RequestServices.GetRequiredService<RoleManager<IdentityRole>>();
-                    if (!await roleManager.RoleExistsAsync("Admin"))
-                        await roleManager.CreateAsync(new IdentityRole("Admin"));
-
-                    await _userManager.AddToRoleAsync(user, "Admin");
-
-                    // إعادة تسجيل الدخول لتحديث الكوكيز
-                    await _signInManager.SignInAsync(user, isPersistent: loginDTO.RememberMe);
-                }
-
-                if (user.Email.ToLower() == "admin@kuwgo.com")
+                if (existingUser.Email.ToLower() == "admin@kuwgo.com")
                     return RedirectToAction("Index", "Admin");
 
                 return RedirectToAction("Index", "Home");
