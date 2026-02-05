@@ -23,6 +23,7 @@ namespace TrainTracking.Infrastructure.Persistence
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<PointRedemption> PointRedemptions { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

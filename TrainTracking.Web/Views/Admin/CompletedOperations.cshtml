@@ -1,0 +1,38 @@
+﻿@model List<TrainTracking.Domain.Entities.Trip>
+
+<h2 class="mb-4">✅ Completed Operations</h2>
+
+<table class="table table-bordered table-striped">
+    <thead class="table-dark">
+        <tr>
+            <th>Trip ID</th>
+            <th>From</th>
+            <th>To</th>
+            <th>Departure</th>
+            <th>Arrival</th>
+            <th>Train</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var trip in Model)
+        {
+            <tr>
+                <td>@trip.Id.ToString().Substring(0, 8)</td>
+                <td>@trip.FromStation?.Name</td>
+                <td>@trip.ToStation?.Name</td>
+                <td>@trip.DepartureTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@trip.ArrivalTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@trip.Train?.TrainNumber</td>
+                <td class="text-success fw-bold">@trip.Status</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info mt-3">
+        لا توجد عمليات مكتملة حتى الآن.
+    </div>
+}
