@@ -101,6 +101,16 @@ public static class DbInitializer
                     ArrivalTime = DateTimeOffset.UtcNow.ToOffset(TimeSpan.FromHours(3)).AddHours(4),
                     Status = TripStatus.OnTime
                 },
+                new Trip
+                {
+                    Id = Guid.NewGuid(),
+                    TrainId = new Guid("aaaa1111-1111-1111-1111-111111111111"),
+                    FromStationId = new Guid("11111111-1111-1111-1111-111111111111"),
+                    ToStationId = new Guid("33333333-3333-3333-3333-333333333333"),
+                    DepartureTime = DateTimeOffset.UtcNow.AddHours(-4),
+                    ArrivalTime = DateTimeOffset.UtcNow.AddHours(-2),
+                    Status = TripStatus.Completed
+                },
                  new Trip
                 {
                     Id = Guid.NewGuid(),
