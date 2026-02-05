@@ -1,14 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using TrainTracking.Infrastructure.Persistence;
-using TrainTracking.Application.Interfaces;
-using TrainTracking.Infrastructure.Repositories;
-using TrainTracking.Web.Hubs;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
-using TrainTracking.Web.Services;
-using TrainTracking.Infrastructure.Services;
-using TrainTracking.Infrastructure.Configuration;
+using TrainTracking.Application.Interfaces;
 using TrainTracking.Application.Services;
+using TrainTracking.Infrastructure.Configuration;
+using TrainTracking.Infrastructure.Persistence;
+using TrainTracking.Infrastructure.Repositories;
+using TrainTracking.Infrastructure.Services;
+using TrainTracking.Infrastructure.Utilities;
+using TrainTracking.Web.Hubs;
+using TrainTracking.Web.Services;
 
 try 
 {
@@ -66,6 +68,9 @@ try
     //options.UseSqlServer(
     //    builder.Configuration.GetConnectionString("DefaultConnection")
     //));
+
+
+    builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 
     builder.Services.AddScoped<ITrainRepository, TrainRepository>();
