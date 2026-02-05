@@ -1,3 +1,5 @@
+@model TrainTracking.Application.DTOs.LoginDTO
+
 @{
     Layout = null;
 }
@@ -217,30 +219,35 @@
             <p class="subtitle">الرجاء إدخال بياناتك للمتابعة</p>
 
             <form asp-action="Login" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-
                 <div class="form-group">
-                    <label class="form-label">البريد الإلكتروني</label>
+                    <label class="form-label">البريد الإلكتروني أو اسم المستخدم</label>
                     <div class="input-group">
-                        <input name="email" type="email" class="form-control" placeholder="example@mail.com" required dir="ltr" style="text-align: right;">
+                        <input asp-for="UserNameOREmail" type="text" class="form-control" placeholder="example@mail.com" required dir="ltr" style="text-align: right;">
                         <i class="fas fa-envelope input-icon"></i>
                     </div>
+                    <span asp-validation-for="UserNameOREmail" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">كلمة المرور</label>
                     <div class="input-group">
-                        <input name="password" type="password" class="form-control" placeholder="••••••••" required dir="ltr" style="text-align: right;">
+                        <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" required dir="ltr" style="text-align: right;">
                         <i class="fas fa-lock input-icon"></i>
                     </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 
-                <div style="display: flex; align-items: center; margin-bottom: 30px;">
-                    <input name="rememberMe" type="checkbox" id="rememberMe" style="width: 18px; height: 18px; margin-left: 10px; cursor: pointer;">
-                    <label for="rememberMe" style="cursor: pointer; font-size: 14px; color: var(--text-muted);">تذكر هذا الجهاز</label>
+                <div class="action-links">
+                    <a asp-action="ForgetPassword">Forget Password</a>
                 </div>
 
-                <button type="submit" class="btn-primary">تسجيل الدخول</button>
+                <div class="form-group form-check">
+                    <input asp-for="RememberMe" type="checkbox" class="form-check-input" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">تذكرني</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
+            
 
                 <div class="action-links">
                     ليس لديك حساب؟ <a asp-action="Register">أنشئ حساباً جديداً</a>
@@ -259,3 +266,8 @@
 
 </body>
 </html>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
