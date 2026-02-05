@@ -11,5 +11,6 @@ namespace TrainTracking.Application.Interfaces
     public interface ISmsService
     {
         Task<SmsResult> SendSmsAsync(string phoneNumber, string message);
+        
     }
 }
