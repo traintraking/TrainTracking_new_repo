@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrainTracking.Infrastructure.Persistence;
 
@@ -10,9 +11,11 @@ using TrainTracking.Infrastructure.Persistence;
 namespace TrainTracking.Infrastructure.Migrations
 {
     [DbContext(typeof(TrainTrackingDbContext))]
-    partial class TrainTrackingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251227192913_AddIdentity")]
+    partial class AddIdentity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -88,7 +91,7 @@ namespace TrainTracking.Infrastructure.Migrations
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("LockoutEnd")
+                    b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("NormalizedEmail")
@@ -215,11 +218,7 @@ namespace TrainTracking.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("BookingDate")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("FromStationId")
+                    b.Property<DateTimeOffset>("BookingDate")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("PassengerName")
@@ -239,93 +238,14 @@ namespace TrainTracking.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ToStationId")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("TripId")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("FromStationId");
-
-                    b.HasIndex("ToStationId");
 
                     b.HasIndex("TripId");
 
                     b.ToTable("Bookings");
-                });
-
-            modelBuilder.Entity("TrainTracking.Domain.Entities.Notification", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("BookingId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ErrorMessage")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsSent")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Message")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Recipient")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("SentAt")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid?>("TripId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("Type")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookingId");
-
-                    b.HasIndex("TripId");
-
-                    b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("TrainTracking.Domain.Entities.PointRedemption", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<int>("PointsRedeemed")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("RedemptionDate")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("PointRedemptions");
                 });
 
             modelBuilder.Entity("TrainTracking.Domain.Entities.Station", b =>
@@ -343,9 +263,6 @@ namespace TrainTracking.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -369,9 +286,6 @@ namespace TrainTracking.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("speed")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.ToTable("Trains");
@@ -383,28 +297,17 @@ namespace TrainTracking.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ArrivalTime")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CancelledAt")
+                    b.Property<DateTimeOffset>("ArrivalTime")
                         .HasColumnType("TEXT");
 
                     b.Property<int?>("DelayMinutes")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("DepartureTime")
-                        .IsRequired()
+                    b.Property<DateTimeOffset>("DepartureTime")
                         .HasColumnType("TEXT");
 
                     b.Property<Guid>("FromStationId")
                         .HasColumnType("TEXT");
-
-                    b.Property<string>("PathPolyline")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18, 3)");
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
@@ -479,42 +382,11 @@ namespace TrainTracking.Infrastructure.Migrations
 
             modelBuilder.Entity("TrainTracking.Domain.Entities.Booking", b =>
                 {
-                    b.HasOne("TrainTracking.Domain.Entities.Station", "FromStation")
-                        .WithMany()
-                        .HasForeignKey("FromStationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TrainTracking.Domain.Entities.Station", "ToStation")
-                        .WithMany()
-                        .HasForeignKey("ToStationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TrainTracking.Domain.Entities.Trip", "Trip")
                         .WithMany()
                         .HasForeignKey("TripId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("FromStation");
-
-                    b.Navigation("ToStation");
-
-                    b.Navigation("Trip");
-                });
-
-            modelBuilder.Entity("TrainTracking.Domain.Entities.Notification", b =>
-                {
-                    b.HasOne("TrainTracking.Domain.Entities.Booking", "Booking")
-                        .WithMany()
-                        .HasForeignKey("BookingId");
-
-                    b.HasOne("TrainTracking.Domain.Entities.Trip", "Trip")
-                        .WithMany()
-                        .HasForeignKey("TripId");
-
-                    b.Navigation("Booking");
 
                     b.Navigation("Trip");
                 });

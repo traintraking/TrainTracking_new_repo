@@ -88,29 +88,6 @@ namespace TrainTracking.Web.Controllers
             return View(recentBookings);
         }
 
-
-        //CompletedOperations
-
-        public async Task<IActionResult> CompletedOperations()
-        {
-            var completedTrips = await _context.Trips
-                .Include(t => t.FromStation)
-                .Include(t => t.ToStation)
-                .Include(t => t.Train)
-                .Where(t => t.Status == TripStatus.Completed)
-                .OrderByDescending(t => t.DepartureTime)
-                .ToListAsync();
-
-            return View(completedTrips);
-        }
-
-
-
-
-
-
-
-
         // --- Trips Management ---
         public async Task<IActionResult> Trips()
         {

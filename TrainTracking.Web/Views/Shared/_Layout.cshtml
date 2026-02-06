@@ -37,36 +37,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        .navbar-custom {
-            background-color: white;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important;
-            padding: 0.5rem 0;
-        }
-
-        .nav-link {
-            color: #555 !important;
-            font-weight: 600;
-            border-radius: 50px;
+        body { font-family: 'Cairo', sans-serif; background-color: #f8f9fa; }
+        .navbar-custom { background-color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05) !important; padding: 0.5rem 0; }
+        .nav-link { 
+            color: #555 !important; 
+            font-weight: 600; 
+            border-radius: 50px; 
             transition: all 0.3s ease;
             position: relative;
         }
-
-            .nav-link:hover {
-                color: #005eb8 !important;
-                background-color: rgba(0, 94, 184, 0.08);
-                transform: translateY(-2px);
-            }
-
-        .footer {
-            background-color: white;
-            padding: 1.5rem 0;
-            margin-top: 3rem;
+        .nav-link:hover { 
+            color: #005eb8 !important; 
+            background-color: rgba(0, 94, 184, 0.08); 
+            transform: translateY(-2px);
         }
+        .footer { background-color: white; padding: 1.5rem 0; margin-top: 3rem; }
     </style>
 </head>
 <body>
@@ -87,10 +72,6 @@
                         <li class="nav-item mx-2"><a class="nav-link py-3 fw-semibold @(Context.Request.Path == "/" ? "text-primary border-bottom border-primary" : "")" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a></li>
                         <li class="nav-item mx-2"><a class="nav-link py-3 fw-semibold @(Context.Request.Path.StartsWithSegments("/Trips") && Context.Request.Path != "/Trips/Live" ? "text-primary border-bottom border-primary" : "")" asp-controller="Trips" asp-action="Index">@Localizer["Trips"]</a></li>
                         <li class="nav-item mx-2"><a class="nav-link py-3 fw-bold text-success @(Context.Request.Path == "/Trips/Live" ? "border-bottom border-success" : "")" asp-controller="Trips" asp-action="Live"><i class="fas fa-satellite-dish me-1"></i> @Localizer["LiveTracking"]</a></li>
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item mx-2"><a class="nav-link py-3 fw-semibold @(Context.Request.Path.StartsWithSegments("/Profile") ? "text-primary border-bottom border-primary" : "")" asp-controller="Profile" asp-action="Index"><i class="fas fa-user me-1"></i> @Localizer["Profile"]</a></li>
-                        }
                     </ul>
                 </div>
 
@@ -111,97 +92,93 @@
             @RenderBody()
         </main>
     </div>
-    <!-- Settings Sidebar (Offcanvas) -->
-    <div class="offcanvas offcanvas-@(isRTL ? "start" : "end") border-0 sidebar-offcanvas" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
-        <div class="offcanvas-header border-bottom py-4">
-            <div class="d-flex align-items-center">
-                <div class="logo-wrapper scale-75">
-                    <i class="fas fa-train logo-icon"></i>
-                    <span class="logo-text ms-1">Kuw<span class="text-primary-go">Go</span></span>
+        <!-- Settings Sidebar (Offcanvas) -->
+        <div class="offcanvas offcanvas-@(isRTL ? "start" : "end") border-0 sidebar-offcanvas" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel">
+            <div class="offcanvas-header border-bottom py-4">
+                <div class="d-flex align-items-center">
+                    <div class="logo-wrapper scale-75">
+                        <i class="fas fa-train logo-icon"></i>
+                        <span class="logo-text ms-1">Kuw<span class="text-primary-go">Go</span></span>
+                    </div>
                 </div>
+                <button type="button" class="btn-close text-reset shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
-            <button type="button" class="btn-close text-reset shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-        </div>
-        <div class="offcanvas-body p-0">
-            <!-- User Profile Section Mobile -->
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <div class="sidebar-user-profile p-4 border-bottom bg-light bg-opacity-10">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="user-avatar-lg @(isRTL ? "me-3" : "ms-3")">
-                            <i class="fas fa-user fa-2x"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 fw-bold">@User.Identity?.Name</h6>
-                            <span class="text-muted small">@points @Localizer["Points"]</span>
-                        </div>
-                    </div>
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <a asp-controller="Bookings" asp-action="Rewards" class="btn btn-outline-warning w-100 btn-sm rounded-pill">
-                                <i class="fas fa-coins @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["Points"]
-                            </a>
-                        </div>
-                        <div class="col-6">
-                            <form asp-controller="Account" asp-action="Logout" method="post">
-                                <button type="submit" class="btn btn-outline-danger w-100 btn-sm rounded-pill">
-                                    <i class="fas fa-sign-out-alt @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["Logout"]
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="p-4 border-bottom bg-light bg-opacity-10">
-                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 rounded-pill shadow-sm">
-                        <i class="fas fa-sign-in-alt @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["MemberLogin"]
-                    </a>
-                </div>
-            }
-
-            <!-- Navigation List -->
-            <div class="list-group list-group-flush py-2 text-@(isRTL ? "start" : "start")">
+            <div class="offcanvas-body p-0">
+                <!-- User Profile Section Mobile -->
                 @if (User.Identity?.IsAuthenticated == true)
                 {
-                    <a asp-controller="Profile" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
-                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-user"></i></div>
-                        @Localizer["Profile"]
-                    </a>
-                    <a asp-controller="Bookings" asp-action="MyBookings" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
-                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-warning"><i class="fas fa-ticket-alt"></i></div>
-                        @Localizer["MyBookings"]
-                    </a>
+                    <div class="sidebar-user-profile p-4 border-bottom bg-light bg-opacity-10">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="user-avatar-lg @(isRTL ? "me-3" : "ms-3")">
+                                <i class="fas fa-user fa-2x"></i>
+                            </div>
+                            <div>
+                                <h6 class="mb-0 fw-bold">@User.Identity?.Name</h6>
+                                <span class="text-muted small">@points @Localizer["Points"]</span>
+                            </div>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a asp-controller="Bookings" asp-action="Rewards" class="btn btn-outline-warning w-100 btn-sm rounded-pill">
+                                    <i class="fas fa-coins @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["Points"]
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="btn btn-outline-danger w-100 btn-sm rounded-pill">
+                                        <i class="fas fa-sign-out-alt @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["Logout"]
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 }
-                @if (User.IsInRole("Admin"))
+                else
                 {
-                    <a asp-controller="Admin" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center text-primary fw-bold">
-                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-tools"></i></div>
-                        @Localizer["Dashboard"]
-                    </a>
+                    <div class="p-4 border-bottom bg-light bg-opacity-10">
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary w-100 rounded-pill shadow-sm">
+                            <i class="fas fa-sign-in-alt @(isRTL ? "me-1" : "ms-1")"></i> @Localizer["MemberLogin"]
+                        </a>
+                    </div>
                 }
-            </div>
 
-            <!-- Footer Section (Theme & Language) -->
-            <div class="mt-auto p-4 border-top">
-                <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-pill mb-3">
-                    <span class="ms-3 small fw-bold">@Localizer["Appearance"]</span>
-                    <button id="themeToggleMobile" class="btn theme-toggle-btn rounded-circle" style="width: 35px; height: 35px;">
-                        <i class="fas fa-moon"></i>
-                    </button>
+                <!-- Navigation List -->
+                <div class="list-group list-group-flush py-2 text-@(isRTL ? "start" : "start")">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <a asp-controller="Bookings" asp-action="MyBookings" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
+                            <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-warning"><i class="fas fa-ticket-alt"></i></div>
+                            @Localizer["MyBookings"]
+                        </a>
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-controller="Admin" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center text-primary fw-bold">
+                            <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-tools"></i></div>
+                            @Localizer["Dashboard"]
+                        </a>
+                    }
                 </div>
 
-                <div class="language-selector p-1 bg-light border rounded-pill d-flex">
-                    <form asp-controller="Culture" asp-action="SetLanguage" method="post" class="w-100 d-flex m-0">
-                        <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                        <button type="submit" name="culture" value="ar-KW" class="btn @(isRTL ? "btn-primary" : "btn-link text-dark text-decoration-none") flex-grow-1 btn-sm rounded-pill fw-bold">عربي</button>
-                        <button type="submit" name="culture" value="en-US" class="btn @(!isRTL ? "btn-primary" : "btn-link text-dark text-decoration-none") flex-grow-1 btn-sm rounded-pill fw-bold">EN</button>
-                    </form>
+                <!-- Footer Section (Theme & Language) -->
+                <div class="mt-auto p-4 border-top">
+                    <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-pill mb-3">
+                        <span class="ms-3 small fw-bold">@Localizer["Appearance"]</span>
+                        <button id="themeToggleMobile" class="btn theme-toggle-btn rounded-circle" style="width: 35px; height: 35px;">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </div>
+
+                    <div class="language-selector p-1 bg-light border rounded-pill d-flex">
+                        <form asp-controller="Culture" asp-action="SetLanguage" method="post" class="w-100 d-flex m-0">
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
+                            <button type="submit" name="culture" value="ar-KW" class="btn @(isRTL ? "btn-primary" : "btn-link text-dark text-decoration-none") flex-grow-1 btn-sm rounded-pill fw-bold">عربي</button>
+                            <button type="submit" name="culture" value="en-US" class="btn @(!isRTL ? "btn-primary" : "btn-link text-dark text-decoration-none") flex-grow-1 btn-sm rounded-pill fw-bold">EN</button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
 
     <script>
@@ -212,7 +189,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             const toggleDesktop = document.getElementById('themeToggle');
             const toggleMobile = document.getElementById('themeToggleMobile');
-
+            
             function updateThemeIcons(theme) {
                 [toggleDesktop, toggleMobile].forEach(btn => {
                     if (!btn) return;
@@ -235,7 +212,7 @@
             function toggleTheme() {
                 let theme = document.documentElement.getAttribute('data-theme');
                 let newTheme = theme === 'light' ? 'dark' : 'light';
-
+                
                 document.documentElement.setAttribute('data-theme', newTheme);
                 localStorage.setItem('theme', newTheme);
                 updateThemeIcons(newTheme);
@@ -335,40 +312,40 @@
 
     @if (User.Identity?.IsAuthenticated == true)
     {
-        <script>
-            document.addEventListener("DOMContentLoaded", function() {
-                // Check if we already asked (optional: use localStorage to avoid spamming)
-                if (sessionStorage.getItem("locationChecked")) return;
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Check if we already asked (optional: use localStorage to avoid spamming)
+            if (sessionStorage.getItem("locationChecked")) return;
 
-                if ("geolocation" in navigator) {
-                    navigator.geolocation.getCurrentPosition(function(position) {
-                        var lat = position.coords.latitude;
-                        var lng = position.coords.longitude;
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
 
-                        // Send to server
-                        fetch(`/Stations/GetNearest?lat=${lat}&lng=${lng}`)
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    document.getElementById("nearestStationName").innerText = data.stationName;
-                                    document.getElementById("stationDistance").innerText = data.distance;
-                                    document.getElementById("bookFromStationBtn").href = `/Trips?searchStation=${data.stationName}`; // Assuming Trips index supports search
+                    // Send to server
+                    fetch(`/Stations/GetNearest?lat=${lat}&lng=${lng}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                document.getElementById("nearestStationName").innerText = data.stationName;
+                                document.getElementById("stationDistance").innerText = data.distance;
+                                document.getElementById("bookFromStationBtn").href = `/Trips?searchStation=${data.stationName}`; // Assuming Trips index supports search
+                                
+                                var toastEl = document.getElementById('stationToast');
+                                var toast = new bootstrap.Toast(toastEl, { delay: 10000 });
+                                toast.show();
+                                
+                                sessionStorage.setItem("locationChecked", "true");
+                            }
+                        })
+                        .catch(err => console.error("Error finding nearest station:", err));
 
-                                    var toastEl = document.getElementById('stationToast');
-                                    var toast = new bootstrap.Toast(toastEl, { delay: 10000 });
-                                    toast.show();
-
-                                    sessionStorage.setItem("locationChecked", "true");
-                                }
-                            })
-                            .catch(err => console.error("Error finding nearest station:", err));
-
-                    }, function(error) {
-                        console.log("Location access denied or error:", error.message);
-                    });
-                }
-            });
-        </script>
+                }, function(error) {
+                    console.log("Location access denied or error:", error.message);
+                });
+            }
+        });
+    </script>
     }
 
     @await RenderSectionAsync("Scripts", required: false)

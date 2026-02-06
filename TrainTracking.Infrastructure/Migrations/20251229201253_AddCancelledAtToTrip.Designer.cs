@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TrainTracking.Infrastructure.Persistence;
 
@@ -10,9 +11,11 @@ using TrainTracking.Infrastructure.Persistence;
 namespace TrainTracking.Infrastructure.Migrations
 {
     [DbContext(typeof(TrainTrackingDbContext))]
-    partial class TrainTrackingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251229201253_AddCancelledAtToTrip")]
+    partial class AddCancelledAtToTrip
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -219,9 +222,6 @@ namespace TrainTracking.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("FromStationId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("PassengerName")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -239,9 +239,6 @@ namespace TrainTracking.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("ToStationId")
-                        .HasColumnType("TEXT");
-
                     b.Property<Guid>("TripId")
                         .HasColumnType("TEXT");
 
@@ -250,10 +247,6 @@ namespace TrainTracking.Infrastructure.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("FromStationId");
-
-                    b.HasIndex("ToStationId");
 
                     b.HasIndex("TripId");
 
@@ -344,9 +337,6 @@ namespace TrainTracking.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("Order")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.ToTable("Stations");
@@ -368,9 +358,6 @@ namespace TrainTracking.Infrastructure.Migrations
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("TEXT");
-
-                    b.Property<int>("speed")
-                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -399,12 +386,6 @@ namespace TrainTracking.Infrastructure.Migrations
 
                     b.Property<Guid>("FromStationId")
                         .HasColumnType("TEXT");
-
-                    b.Property<string>("PathPolyline")
-                        .HasColumnType("TEXT");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18, 3)");
 
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
@@ -479,27 +460,11 @@ namespace TrainTracking.Infrastructure.Migrations
 
             modelBuilder.Entity("TrainTracking.Domain.Entities.Booking", b =>
                 {
-                    b.HasOne("TrainTracking.Domain.Entities.Station", "FromStation")
-                        .WithMany()
-                        .HasForeignKey("FromStationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TrainTracking.Domain.Entities.Station", "ToStation")
-                        .WithMany()
-                        .HasForeignKey("ToStationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TrainTracking.Domain.Entities.Trip", "Trip")
                         .WithMany()
                         .HasForeignKey("TripId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("FromStation");
-
-                    b.Navigation("ToStation");
 
                     b.Navigation("Trip");
                 });
