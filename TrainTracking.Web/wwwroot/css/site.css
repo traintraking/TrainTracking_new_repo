@@ -858,3 +858,385 @@ body {
 
 /* [CLEANUP] Redundant rules removed. Theme logic centralized. */
 
+/* ================= MODERN FOOTER ================= */
+.modern-footer {
+  background: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  padding: 80px 0 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.footer-social-link {
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 94, 184, 0.1);
+  color: var(--accent-color);
+  transition: all 0.3s ease;
+  margin-right: 10px;
+}
+
+.footer-social-link:hover {
+  background: var(--accent-color);
+  color: white;
+  transform: translateY(-3px);
+}
+
+.footer-links-list {
+  list-style: none;
+  padding: 0;
+}
+
+.footer-links-list li {
+  margin-bottom: 12px;
+}
+
+.footer-links-list a {
+  color: var(--muted-text);
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+.footer-links-list a:hover {
+  color: var(--accent-color);
+  transform: translateX(5px);
+}
+
+/* ================= TRIPS PAGE ENHANCEMENTS ================= */
+.trips-hero {
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('https://images.unsplash.com/photo-1474487056289-622ad5096382?auto=format&fit=crop&q=80&w=1600');
+  background-size: cover;
+  background-position: center;
+  border-radius: 24px;
+  padding: 120px 40px;
+  color: white;
+  text-align: center;
+  margin-bottom: -60px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.testimonial-card {
+  background: var(--card-bg);
+  padding: 25px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-color);
+  transition: all 0.3s ease;
+  width: 350px;
+  /* Fixed width for seamless loop */
+  margin: 0 15px;
+  flex-shrink: 0;
+  white-space: normal;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--accent-color);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 3px solid var(--accent-color);
+}
+
+.marquee-container {
+  overflow: hidden;
+  position: relative;
+  padding: 10px 0;
+  width: 100%;
+}
+
+.marquee-content {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 60s linear infinite;
+}
+
+.marquee-reverse {
+  animation: marquee-scroll-reverse 60s linear infinite;
+}
+
+[dir="rtl"] .marquee-content {
+  animation: marquee-scroll-rtl 60s linear infinite;
+}
+
+[dir="rtl"] .marquee-reverse {
+  animation: marquee-scroll-rtl-reverse 60s linear infinite;
+}
+
+.marquee-content:hover {
+  animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-scroll-reverse {
+  0% {
+    transform: translateX(-50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes marquee-scroll-rtl {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(50%);
+  }
+}
+
+@keyframes marquee-scroll-rtl-reverse {
+  0% {
+    transform: translateX(50%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Ensure no gaps visually using a mask */
+.marquee-container::before,
+.marquee-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 150px;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.marquee-container::before {
+  left: 0;
+  background: linear-gradient(to right, var(--bg-color), transparent);
+}
+
+.marquee-container::after {
+  right: 0;
+  background: linear-gradient(to left, var(--bg-color), transparent);
+}
+
+.stat-box {
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-color);
+  transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent-color);
+}
+
+.stat-number {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: var(--accent-color);
+  display: block;
+  line-height: 1;
+  margin-bottom: 10px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--muted-text);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 700;
+}
+
+.trips-hero {
+  position: relative;
+  min-height: 550px;
+  background: url('https://antigravity-artifacts.s3.amazonaws.com/kuwgo_future_train_station_1770410845401.png') no-repeat center center;
+  background-size: cover;
+  border-radius: 40px;
+  padding: 60px 40px;
+  color: white;
+  margin-bottom: 60px;
+  /* Better spacing for features */
+  z-index: 1;
+  box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  /* Unified blur across background */
+}
+
+.hero-content-wrapper {
+  position: relative;
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.65);
+  /* Single dark translucent container */
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 40px;
+  padding: 80px 50px;
+  max-width: 950px;
+  width: 95%;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+/* Removed redundant .hero-glass-card */
+
+.hero-overlay-dark {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.4);
+  z-index: 1;
+}
+
+.premium-title {
+  font-size: clamp(2.8rem, 7vw, 4.8rem);
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 25px;
+  color: #fff;
+  text-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.identity-badge-premium {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  background: rgba(0, 94, 184, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border-radius: 100px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 0.8rem;
+  margin-bottom: 35px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.features-section {
+  position: relative;
+  z-index: 20;
+  /* Ensure this is on top of hero for hover */
+  margin-top: 0;
+  padding-top: 40px;
+}
+
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* ====================== Rotating Decorative Circles ====================== */
+.hero-circle {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  border: 4px dashed rgba(255, 255, 255, 0.15);
+  /* Thicker line as requested */
+  pointer-events: none;
+  z-index: 1;
+  animation: hero-rotate 30s linear infinite;
+}
+
+.circle-1 {
+  width: 600px;
+  height: 600px;
+  top: -100px;
+  left: -250px;
+  border-color: rgba(0, 136, 255, 0.2);
+}
+
+.circle-2 {
+  width: 550px;
+  height: 550px;
+  bottom: -200px;
+  right: -200px;
+  border-color: rgba(0, 136, 255, 0.2);
+  animation-duration: 45s;
+  animation-direction: reverse;
+}
+
+.circle-3 {
+  width: 500px;
+  height: 500px;
+  top: -250px;
+  /* Raised significantly to avoid intersection */
+  /* Pushed further into the corner */
+  right: -200px;
+  /* Pushed further into the corner */
+  border-color: rgba(0, 136, 255, 0.2);
+  animation-duration: 35s;
+}
+
+.circle-4 {
+  width: 400px;
+  height: 400px;
+  top: 500px;
+  left: 200px;
+  border-color: rgba(0, 136, 255, 0.2);
+}
+@keyframes hero-rotate {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.hero-glow-follow {
+  position: absolute;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.15) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  filter: blur(60px);
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.trips-hero:hover .hero-glow-follow {
+  opacity: 1;
+}

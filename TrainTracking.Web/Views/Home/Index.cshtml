@@ -3,26 +3,73 @@
 @{
     ViewData["Title"] = Localizer["WelcomeTo"];
 }
-<div class="hero-section text-center text-white d-flex align-items-center justify-content-center mb-5" style="background: linear-gradient(135deg, #2c3e50, #3498db); min-height: 500px; border-radius: 0 0 50px 50px; margin-top: -1.5rem;">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-lg-8 animate-fade-up">
-                <div class="mb-4">
-                    <i class="fas fa-train fa-4x text-white mb-3 opacity-75"></i>
+
+<!-- World-Class Futuristic Hero Section -->
+<div class="container-fluid px-lg-5 mt-4">
+    <div class="trips-hero" id="homeHero">
+        <!-- Overlay for better text contrast -->
+        <div class="hero-overlay-dark"></div>
+        
+        <!-- Interactive Glow follow -->
+        <div class="hero-glow-follow" id="heroGlow"></div>
+        
+        <!-- Rotating Decorative Circles -->
+        <div class="hero-circle circle-1"></div>
+        <div class="hero-circle circle-2"></div>
+        <div class="hero-circle circle-3"></div>
+        <div class="hero-circle circle-4"></div>
+
+        <!-- Unified Content Layer -->
+        <div class="row justify-content-center w-100 hero-content-wrapper">
+            <div class="col-lg-10 text-center text-white animate-fade-up">
+                <div class="identity-badge-premium">
+                    <i class="fas fa-train"></i> @Localizer["OfficialCarrier"]
                 </div>
-                <h1 class="display-3 fw-bold mb-3">@Localizer["WelcomeTo"]</h1>
-                <p class="lead fs-4 mb-5 opacity-90">@Localizer["HeroSubline"]</p>
-                <a asp-controller="Trips" asp-action="Index" class="btn btn-light btn-lg rounded-pill px-5 py-3 fw-bold text-primary shadow-lg hover-scale">
-                    <i class="fas fa-search me-2"></i> @Localizer["BrowseTrips"]
-                </a>
+                <h1 class="premium-title">@Localizer["WelcomeTo"]</h1>
+                <p class="lead mb-5 opacity-90 fs-4 fw-light" style="max-width: 800px; margin: 0 auto 3rem;">@Localizer["HeroSubline"]</p>
+                
+                <div class="pt-2">
+                    <a asp-controller="Trips" asp-action="Index" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg hover-scale border-0" style="background: linear-gradient(45deg, #005eb8, #0088ff);">
+                        <i class="fas fa-search me-2"></i> @Localizer["BrowseTrips"]
+                    </a>
+                    <a asp-controller="Trips" asp-action="Live" class="btn btn-outline-light btn-lg rounded-pill px-5 py-3 fw-bold ms-lg-3 mt-3 mt-lg-0 hover-scale backdrop-blur" style="border: 1px solid rgba(255,255,255,0.3);">
+                        <i class="fas fa-satellite-dish me-2"></i> @Localizer["LiveTracking"]
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<div class="container mb-5">
-    <div class="row g-4 text-center">
+
+<script>
+    const hero = document.getElementById('homeHero');
+    const glow = document.getElementById('heroGlow');
+    
+    hero.addEventListener('mousemove', (e) => {
+        const rect = hero.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        // Update glow position
+        glow.style.left = x + 'px';
+        glow.style.top = y + 'px';
+        
+        // Subtle Parallax effect on background
+        const moveX = (x - rect.width / 2) / 30;
+        const moveY = (y - rect.height / 2) / 30;
+        hero.style.backgroundPosition = `calc(50% + ${moveX}px) calc(50% + ${moveY}px)`;
+    });
+
+    hero.addEventListener('mouseleave', () => {
+        hero.style.backgroundPosition = 'center center';
+    });
+</script>
+
+<div class="container py-5 features-section">
+    <!-- Main Features -->
+    <div class="row g-4 mb-5 text-center">
         <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift bg-card shadow-lg">
                 <div class="card-body">
                     <div class="icon-box bg-soft-primary text-primary rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
                         <i class="fas fa-clock fa-2x"></i>
@@ -33,7 +80,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift bg-card shadow-lg">
                 <div class="card-body">
                     <div class="icon-box bg-soft-success text-success rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
                         <i class="fas fa-map-marked-alt fa-2x"></i>
@@ -44,7 +91,7 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift">
+            <div class="card h-100 border-0 shadow-sm rounded-4 p-4 hover-lift bg-card shadow-lg">
                 <div class="card-body">
                     <div class="icon-box bg-soft-warning text-warning rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
                         <i class="fas fa-bolt fa-2x"></i>
@@ -55,34 +102,130 @@
             </div>
         </div>
     </div>
+
+    <!-- Identity & Stats Section -->
+    <div class="row g-4 mb-5 mt-5">
+        <div class="col-md-4">
+            <div class="stat-box">
+                <span class="stat-number">15+</span>
+                <span class="stat-label">@Localizer["CitiesConnected"]</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box">
+                <span class="stat-number">1.2M</span>
+                <span class="stat-label">@Localizer["HappyPassengers"]</span>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-box">
+                <span class="stat-number">99%</span>
+                <span class="stat-label">@Localizer["OnTimePerformance"]</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Testimonials Header -->
+    <div class="text-center mb-4 mt-5">
+        <h2 class="fw-bold">@Localizer["WhatOurUsersSay"]</h2>
+        <p class="text-muted">@Localizer["TestimonialsSubtitle"]</p>
+    </div>
+
+    <!-- Moving Comments (Marquee) - 3 Rows -->
+    <div class="marquee-wrapper mt-5 pb-5">
+        <!-- Row 1: Forward -->
+        <div class="marquee-container mb-1">
+            <div class="marquee-content">
+                @for (int i = 0; i < 2; i++)
+                {
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=11" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">أحمد العتيبي</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"تجربة حجز رائعة، التطبيق سهل جداً والقطار دائماً في موعده."</p>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=12" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">Sarah Williams</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"Excellent real-time tracking! I never have to worry about missing my train."</p>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=13" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">فهد الشمري</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"نظام النقاط والمكافآت مميز جداً. وفرت الكثير في رحلاتي الأسبوعية."</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Row 2: Reverse -->
+        <div class="marquee-container mb-1">
+            <div class="marquee-content marquee-reverse">
+                @for (int i = 0; i < 2; i++)
+                {
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=14" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">منى علي</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"المحطات نظيفة جداً والقطارات مريحة. شكراً للقائمين على هذا المشروع."</p>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=15" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">James Miller</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"The VIP trains are world-class. Traveled to Jahra in record time!"</p>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=16" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">نورة الصباح</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"بصراحة، تطبيق مصري يفوق التوقعات. سهولة في الحجز ودقة."</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Row 3: Forward -->
+        <div class="marquee-container">
+            <div class="marquee-content">
+                @for (int i = 0; i < 2; i++)
+                {
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=17" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">خالد الرشيدي</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"أفضل وسيلة للتنقل في مصر حالياً. سرعة وراحة لا تقارن."</p>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=18" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">Emma Wilson</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"Very smooth ride and helpful staff. The app makes everything easy."</p>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="https://i.pravatar.cc/150?u=19" class="testimonial-avatar me-3 ms-3" alt="User">
+                            <div><h6 class="mb-0 fw-bold">سعود المطيري</h6><div class="text-warning small"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div></div>
+                        </div>
+                        <p class="mb-0 text-muted">"أنصح الجميع باستخدامه، يوفر الوقت والجهد بشكل ملحوظ."</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
 </div>
+
 <style>
-    .hover-scale:hover {
-        transform: scale(1.05);
-        transition: transform 0.3s ease;
-    }
-
-    .hover-lift {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-        .hover-lift:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
-        }
-
-    .bg-soft-primary {
-        background-color: #cfe2ff;
-    }
-
-    .bg-soft-success {
-        background-color: #d1e7dd;
-    }
-
-    .bg-soft-warning {
-        background-color: #fff3cd;
-    }
-
     .animate-fade-up {
         animation: fadeUp 1s ease-out;
     }
@@ -92,7 +235,6 @@
             opacity: 0;
             transform: translateY(20px);
         }
-
         to {
             opacity: 1;
             transform: translateY(0);

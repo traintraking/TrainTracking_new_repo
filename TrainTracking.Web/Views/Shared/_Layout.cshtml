@@ -239,11 +239,53 @@
             @RenderBody()
         </main>
     </div>
-    <footer class="footer text-muted border-top">
-        <div class="container text-center">
-            &copy; 2025 - KuwGo - <a asp-controller="Home" asp-action="Privacy">@Localizer["Privacy"]</a>
-            <span class="mx-2 opacity-50">|</span>
-            <span class="small fw-semibold text-primary-go pt-1">@Localizer["PoweredBy"] <span class="badge border border-primary text-primary px-2 py-1 ms-1" style="font-size: 0.65rem;">MH</span></span>
+    <footer class="modern-footer">
+        <div class="container">
+            <div class="row g-4 mb-5">
+                <div class="col-lg-4 col-md-6">
+                    <div class="logo-wrapper mb-4">
+                        <i class="fas fa-train logo-icon"></i>
+                        <span class="logo-text ms-1">Kuw<span class="text-primary-go">Go</span></span>
+                    </div>
+                    <p class="text-muted mb-4 pe-lg-4">
+                        @Localizer["FooterTagline"]
+                    </p>
+                    <div class="footer-socials">
+                        <a href="#" class="footer-social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="footer-social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="footer-social-link"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="fw-bold mb-4">@Localizer["QuickLinks"]</h6>
+                    <ul class="footer-links-list">
+                        <li><a asp-controller="Home" asp-action="Index">@Localizer["Home"]</a></li>
+                        <li><a asp-controller="Trips" asp-action="Index">@Localizer["Trips"]</a></li>
+                        <li><a asp-controller="Trips" asp-action="Live">@Localizer["LiveTracking"]</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-4">@Localizer["Support"]</h6>
+                    <ul class="footer-links-list">
+                        <li><a asp-controller="Home" asp-action="Privacy">@Localizer["Privacy"]</a></li>
+                        <li><a href="#">@Localizer["TermsOfService"]</a></li>
+                        <li><a href="#">@Localizer["HelpCenter"]</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="fw-bold mb-4">@Localizer["ContactUs"]</h6>
+                    <p class="text-muted small mb-2"><i class="fas fa-map-marker-alt text-primary me-2 ms-2"></i> Kuwait City, Kuwait</p>
+                    <p class="text-muted small mb-2"><i class="fas fa-phone text-primary me-2 ms-2"></i> +965 1234 5678</p>
+                    <p class="text-muted small"><i class="fas fa-envelope text-primary me-2 ms-2"></i> info@kuwgo.com</p>
+                </div>
+            </div>
+            <div class="border-top pt-4 text-center">
+                <p class="text-muted small mb-0">
+                    &copy; 2025 - KuwGo. All Rights Reserved.
+                    <span class="mx-2 opacity-25">|</span>
+                    <span class="fw-semibold text-primary">Made with <i class="fas fa-heart text-danger"></i> in Kuwait</span>
+                </p>
+            </div>
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
