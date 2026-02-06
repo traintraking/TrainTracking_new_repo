@@ -1,37 +1,59 @@
 ﻿@model TrainTracking.Application.DTOs.ResendEmailConfirmationDTO
+
 @{
-    ViewData["Title"] = "ResendEmailConfirmation";
+    Layout = null;
 }
 
-<div class="container">
-    <h1>ResendEmailConfirmation</h1>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إعادة إرسال تأكيد البريد - KuwGo</title>
+    <script>
+        (function () {
+            const theme = document.cookie.split('; ').find(row => row.startsWith('theme='))?.split('=')[1];
+            if (theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+        })();
+    </script>
+    <link href="/css/site.css" rel="stylesheet">
+    <link href="/css/auth.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="mesh-bg"></div>
+    
 
-    <h4>ResendEmailConfirmationVM</h4>
-    <hr />
-    <div class="row">
-        <div class="col-md-12">
-            <form asp-action="ResendEmailConfirmation">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="auth-container">
+        <div class="glass-card">
+            <img src="/images/logo.png" alt="KuwGo" class="brand-logo">
+            
+            <h1 class="auth-title">تفعيل الحساب 📧</h1>
+            <p class="auth-subtitle">أدخل بياناتك لإعادة إرسال رابط تأكيد البريد الإلكتروني.</p>
+
+            <form asp-action="ResendEmailConfirmation" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3" style="font-size: 14px; text-align: center;"></div>
+
                 <div class="form-group">
-                    <label asp-for="UserNameOREmail" class="control-label"></label>
-                    <input asp-for="UserNameOREmail" class="form-control" />
-                    <span asp-validation-for="UserNameOREmail" class="text-danger"></span>
+                    <label class="form-label">البريد الإلكتروني أو اسم المستخدم</label>
+                    <div class="input-wrapper">
+                        <input asp-for="UserNameOREmail" type="text" class="form-control" placeholder="example@mail.com" required dir="ltr">
+                        <i class="fas fa-envelope input-icon"></i>
+                    </div>
+                    <span asp-validation-for="UserNameOREmail" class="text-danger" style="font-size: 12px; display: block; margin-top: -15px; margin-bottom: 20px;"></span>
                 </div>
-                <div class="form-group mt-3">
-                    <input type="submit" value="Send" class="btn btn-primary" />
-                </div>
+
+                <button type="submit" class="btn-submit">
+                    إرسال رابط التأكيد
+                </button>
+
+                <a asp-action="Login" class="back-link">
+                    العودة لتسجيل الدخول <i class="fas fa-arrow-left"></i>
+                </a>
             </form>
         </div>
     </div>
-
-    <div>
-        <a asp-action="Login">Back to Login</a>
-    </div>
-</div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}
-
+</body>
+</html>

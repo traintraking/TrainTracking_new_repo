@@ -19,12 +19,17 @@
         })();
     </script>
     <link href="/css/site.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #005eb8;
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
             --input-bg: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         /* Sync with global theme variables if available */
@@ -218,6 +223,26 @@
             <h1 class="title">مرحباً بعودتك! 👋</h1>
             <p class="subtitle">الرجاء إدخال بياناتك للمتابعة</p>
 
+            <!-- Notifications Section -->
+            @if (TempData["info"] != null)
+            {
+                <div class="alert alert-info border-0 shadow-sm rounded-4 mb-4 py-3 animate-fade-in" style="background: rgba(0, 94, 184, 0.1); color: var(--primary-color);">
+                    <i class="fas fa-info-circle me-2"></i> @TempData["info"]
+                </div>
+            }
+            @if (TempData["success"] != null || TempData["success-notification"] != null)
+            {
+                <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 py-3 animate-fade-in" style="background: rgba(16, 185, 129, 0.1); color: #059669;">
+                    <i class="fas fa-check-circle me-2"></i> @(TempData["success"] ?? TempData["success-notification"])
+                </div>
+            }
+            @if (TempData["error"] != null || TempData["error-notification"] != null)
+            {
+                <div class="alert alert-danger border-0 shadow-sm rounded-4 mb-4 py-3 animate-fade-in" style="background: rgba(239, 68, 68, 0.1); color: #dc2626;">
+                    <i class="fas fa-exclamation-triangle me-2"></i> @(TempData["error"] ?? TempData["error-notification"])
+                </div>
+            }
+
             <form asp-action="Login" method="post">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                 <div class="form-group">
@@ -238,20 +263,25 @@
                     <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 
-                <div class="action-links">
-                    <a asp-action="ForgetPassword">Forget Password</a>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check m-0">
+                        <input asp-for="RememberMe" type="checkbox" class="form-check-input" id="rememberMe">
+                        <label class="form-check-label" for="rememberMe">تذكرني</label>
+                    </div>
                 </div>
 
-                <div class="form-group form-check">
-                    <input asp-for="RememberMe" type="checkbox" class="form-check-input" id="rememberMe">
-                    <label class="form-check-label" for="rememberMe">تذكرني</label>
-                </div>
+                <button type="submit" class="btn-primary shadow-sm">تسجيل الدخول</button>
 
-                <button type="submit" class="btn btn-primary">تسجيل الدخول</button>
-            
-
-                <div class="action-links">
-                    ليس لديك حساب؟ <a asp-action="Register">أنشئ حساباً جديداً</a>
+                <div class="action-links py-4">
+                    <div class="mb-3">
+                        ليس لديك حساب؟ <a asp-action="Register">أنشئ حساباً جديداً</a>
+                    </div>
+                    <div class="mb-2">
+                         <a asp-action="ForgetPassword" class="small text-decoration-none" style="color: var(--primary-color); font-weight: 500;">نسيت كلمة المرور؟</a>
+                    </div>
+                    <div>
+                         <a asp-action="ResendEmailConfirmation" class="small text-decoration-none" style="color: var(--primary-color); font-weight: 500;">إعادة إرسال رابط تفعيل الحساب</a>
+                    </div>
                 </div>
             </form>
         </div>

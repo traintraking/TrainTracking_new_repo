@@ -180,6 +180,7 @@ namespace TrainTracking.Web.Controllers
             await _emailSender.SendEmailAsync(user.Email!, "Ecommerce 519 - Resend Confirm Your Email!"
                 , $"<h1>Confirm Your Email By Clicking <a href='{link}'>Here</a></h1>");
 
+            TempData["info"] = "إذا كان الحساب مسجلاً، فستصلك رسالة تأكيد على بريدك الإلكتروني قريباً.";
             return RedirectToAction("Login");
         }
 

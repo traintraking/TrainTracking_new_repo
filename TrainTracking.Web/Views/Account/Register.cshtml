@@ -19,12 +19,17 @@
         })();
     </script>
     <link href="/css/site.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --primary-color: #005eb8;
             --text-main: #2c3e50;
             --text-muted: #7f8c8d;
             --input-bg: #f8f9fa;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         /* Sync with global theme variables if available */
@@ -59,7 +64,6 @@
         /* 2. Image Side (Left) */
         .image-section {
             flex: 1.2;
-            /* Different image for variety or same theme */
             background-image: linear-gradient(rgba(0, 94, 184, 0.2), rgba(0, 94, 184, 0.4)), url('/images/login_train.png');
             background-size: cover;
             background-position: center;
@@ -74,7 +78,6 @@
         .auth-wrapper {
             width: 100%;
             max-width: 400px;
-            /* Slight top margin to ensure centered feel vertically if screen is tall */
             margin-top: 20px;
             margin-bottom: 20px;
         }
@@ -237,28 +240,26 @@
                         <input asp-for="UserName" type="text" class="form-control"
                                dir="ltr" style="text-align: right;" />
                         <span asp-validation-for="UserName" class="text-danger"></span>
-                        <i class="fas fa-envelope input-icon"></i>
+                        <i class="fas fa-user input-icon"></i>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">كلمة المرور</label>
                     <div class="input-group">
-                        <input name="Password" type="password" class="form-control" placeholder="••••••••" required dir="ltr" style="text-align: right;">
+                        <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" required dir="ltr" style="text-align: right;">
                         <i class="fas fa-lock input-icon"></i>
                     </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">تأكيد كلمة المرور</label>
                     <div class="input-group">
-                        <input name="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" required dir="ltr" style="text-align: right;">
+                        <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="••••••••" required dir="ltr" style="text-align: right;">
                         <i class="fas fa-check-circle input-icon"></i>
                     </div>
-                </div>
-
-                <div class="action-links"style="right">
-                    <a asp-action="ResendEmailConfirmation">Resend email confirmation</a>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
                 </div>
 
                 <button type="submit" class="btn-primary">إنشاء الحساب</button>
