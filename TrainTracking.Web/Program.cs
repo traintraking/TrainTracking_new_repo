@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
 using TrainTracking.Application.Interfaces;
 using TrainTracking.Application.Services;
+using TrainTracking.Domain.Interfaces;
 using TrainTracking.Infrastructure.Configuration;
 using TrainTracking.Infrastructure.Persistence;
 using TrainTracking.Infrastructure.Repositories;
@@ -72,7 +73,9 @@ try
 
     builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-
+    // في قسم الـ Services
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<ITrainRepository, TrainRepository>();
     builder.Services.AddScoped<ITripRepository, TripRepository>();
     builder.Services.AddScoped<IBookingRepository, BookingRepository>();
