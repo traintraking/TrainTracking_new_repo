@@ -36,16 +36,27 @@ namespace TrainTracking.Infrastructure.Repositories
 
             if (fromStation == null || toStation == null) return true;
 
-            return await _context.Bookings
+            var fromOrder = fromStation.Order;
+            var toOrder = toStation.Order;
+            var requestedMin = Math.Min(fromOrder, toOrder);
+            var requestedMax = Math.Max(fromOrder, toOrder);
+            var expirationTime = DateTimeOffset.Now.AddMinutes(-30);
+
+            var existingBookings = await _context.Bookings
                 .Include(b => b.FromStation)
                 .Include(b => b.ToStation)
-                .AnyAsync(b =>
-                    b.TripId == tripId &&
-                    b.SeatNumber == seatNumber &&
-                    b.Status != BookingStatus.Cancelled &&
-                    // شرط التداخل: (بداية الحجز الحالي < نهاية الحجز المطلوب) و (نهاية الحجز الحالي > بداية الحجز المطلوب)
-                    b.FromStation.Order < toStation.Order &&
-                    b.ToStation.Order > fromStation.Order);
+                .Where(b => b.TripId == tripId &&
+                            b.SeatNumber == seatNumber &&
+                            (
+                                b.Status == BookingStatus.Confirmed ||
+                                (b.Status == BookingStatus.PendingPayment && b.BookingDate > expirationTime)
+                            ))
+                .ToListAsync();
+
+            return existingBookings.Any(b =>
+                b.FromStation != null && b.ToStation != null &&
+                Math.Max(requestedMin, Math.Min(b.FromStation.Order, b.ToStation.Order)) < 
+                Math.Min(requestedMax, Math.Max(b.FromStation.Order, b.ToStation.Order)));
         }
 
         public async Task<Booking?> GetByIdAsync(Guid id)
@@ -88,18 +99,27 @@ namespace TrainTracking.Infrastructure.Repositories
 
             if (fromStation == null || toStation == null) return new List<int>();
 
-            var expirationTime = DateTimeOffset.Now.AddMinutes(-1);
+            var fromOrder = fromStation.Order;
+            var toOrder = toStation.Order;
+            var requestedMin = Math.Min(fromOrder, toOrder);
+            var requestedMax = Math.Max(fromOrder, toOrder);
+            var expirationTime = DateTimeOffset.Now.AddMinutes(-30);
 
-            return await _context.Bookings
+            var query = await _context.Bookings
                 .Include(b => b.FromStation)
                 .Include(b => b.ToStation)
                 .Where(b => b.TripId == tripId && (
                     b.Status == BookingStatus.Confirmed ||
                     (b.Status == BookingStatus.PendingPayment && b.BookingDate > expirationTime)
                 ))
-                .Where(b => b.FromStation.Order < toStation.Order && b.ToStation.Order > fromStation.Order)
-                .Select(b => b.SeatNumber)
                 .ToListAsync();
+
+            return query
+                .Where(b => b.FromStation != null && b.ToStation != null &&
+                            Math.Max(requestedMin, Math.Min(b.FromStation.Order, b.ToStation.Order)) < 
+                            Math.Min(requestedMax, Math.Max(b.FromStation.Order, b.ToStation.Order)))
+                .Select(b => b.SeatNumber)
+                .ToList();
         }
 
         public async Task UpdateAsync(Booking booking)

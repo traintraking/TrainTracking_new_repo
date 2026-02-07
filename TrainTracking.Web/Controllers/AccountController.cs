@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
 
 namespace TrainTracking.Web.Controllers
 {
@@ -71,8 +72,8 @@ namespace TrainTracking.Web.Controllers
             }
 
             // 2. Normal Login Flow
-            var existingUser = await _userManager.FindByNameAsync(loginDTO.UserNameOREmail)
-                       ?? await _userManager.FindByEmailAsync(loginDTO.UserNameOREmail);
+            // نستخدم FirstOrDefaultAsync لتجنب خطأ "Sequence contains more than one element"
+            var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == loginDTO.UserNameOREmail || u.Email == loginDTO.UserNameOREmail);
 
             if (existingUser == null)
             {
@@ -152,17 +153,26 @@ namespace TrainTracking.Web.Controllers
 
         public async Task<IActionResult> ConfirmEmail(string userId, string token)
         {
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(token))
+            {
+                TempData["error-notification"] = "بيانات التفعيل غير صالحة.";
+                return RedirectToAction("Login");
+            }
+
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user is null)
-                TempData["error-notification"] = "Invalid User Cred.";
+            {
+                TempData["error-notification"] = "المستخدم غير موجود.";
+                return RedirectToAction("Login");
+            }
 
             var result = await _userManager.ConfirmEmailAsync(user, token);
 
             if (!result.Succeeded)
-                TempData["error-notification"] = "Invalid OR Expired Token";
+                TempData["error-notification"] = "رابط التفعيل منتهي الصلاحية أو غير صالح.";
             else
-                TempData["success-notification"] = "Confirm Email Successfully";
+                TempData["success-notification"] = "تم تفعيل الحساب بنجاح. يمكنك الآن تسجيل الدخول.";
 
             return RedirectToAction("Login");
         }
@@ -178,26 +188,27 @@ namespace TrainTracking.Web.Controllers
             if (!ModelState.IsValid)
                 return View(resendEmailConfirmationDTO);
 
-            var user = await _userManager.FindByNameAsync(resendEmailConfirmationDTO.UserNameOREmail) ?? await _userManager.FindByEmailAsync(resendEmailConfirmationDTO.UserNameOREmail);
+            // نستخدم FirstOrDefault لتجنب خطأ "Sequence contains more than one element" في حال وجود تكرار
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == resendEmailConfirmationDTO.UserNameOREmail || u.Email == resendEmailConfirmationDTO.UserNameOREmail);
 
             if (user is null)
             {
-                ModelState.AddModelError(string.Empty, "Invalid User Name / Email");
+                ModelState.AddModelError(string.Empty, "برجاء التأكد من اسم المستخدم أو البريد الإلكتروني.");
                 return View(resendEmailConfirmationDTO);
             }
 
             if (user.EmailConfirmed)
             {
-                ModelState.AddModelError(string.Empty, "Already Confirmed!!");
+                ModelState.AddModelError(string.Empty, "الحساب مفعل بالفعل!");
                 return View(resendEmailConfirmationDTO);
             }
 
             // Send Confirmation Mail
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var link = Url.Action(nameof(ConfirmEmail), "Account", new { area = "Identity", token, userId = user.Id }, Request.Scheme);
+            var link = Url.Action(nameof(ConfirmEmail), "Account", new { token = token, userId = user.Id }, Request.Scheme);
 
-            await _emailSender.SendEmailAsync(user.Email!, "Ecommerce 519 - Resend Confirm Your Email!"
-                , $"<h1>Confirm Your Email By Clicking <a href='{link}'>Here</a></h1>");
+            await _emailSender.SendEmailAsync(user.Email!, "تأكيد بريدك الإلكتروني - Train Tracking",
+                $"<div style='direction: rtl; font-family: Cairo, sans-serif;'><h1>تفعيل الحساب</h1><p>يرجى الضغط على الرابط التالي لتفعيل حسابك:</p><a href='{link}'>اضغط هنا للتفعيل</a></div>");
 
             TempData["info"] = "إذا كان الحساب مسجلاً، فستصلك رسالة تأكيد على بريدك الإلكتروني قريباً.";
             return RedirectToAction("Login");

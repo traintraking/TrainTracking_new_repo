@@ -50,6 +50,7 @@ namespace TrainTracking.Web.Controllers
             return basePrice;
         }
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Create(Guid? id, Guid? tripId, Guid? fromStationId, Guid? toStationId)
         {
             var targetId = id ?? tripId;
@@ -108,6 +109,7 @@ namespace TrainTracking.Web.Controllers
 
         /// ///////////////////////////////////////////////////////////////////////////////<summary>
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Booking booking, string selectedSeats)
         {
@@ -190,8 +192,14 @@ namespace TrainTracking.Web.Controllers
             {
                 var booking = await _bookingRepository.GetByIdAsync(id);
 
-                if (booking != null && booking.UserId == userId && booking.Status == BookingStatus.PendingPayment)
+                if (booking != null && (booking.UserId == userId || booking.UserId == "Guest") && booking.Status == BookingStatus.PendingPayment)
                 {
+                    // Assign to current user if it was a guest booking
+                    if (booking.UserId == "Guest")
+                    {
+                        booking.UserId = userId!;
+                        await _bookingRepository.UpdateAsync(booking);
+                    }
                     bookings.Add(booking);
                 }
             }
