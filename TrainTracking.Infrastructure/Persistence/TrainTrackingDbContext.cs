@@ -10,7 +10,7 @@ using TrainTracking.Domain.Entities;
 
 namespace TrainTracking.Infrastructure.Persistence
 {
-    public class TrainTrackingDbContext : IdentityDbContext<Microsoft.AspNetCore.Identity.IdentityUser>
+    public class TrainTrackingDbContext : IdentityDbContext<ApplicationUser>
     {
         public TrainTrackingDbContext(DbContextOptions<TrainTrackingDbContext> options)
             : base(options)
@@ -27,6 +27,9 @@ namespace TrainTracking.Infrastructure.Persistence
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // نحدد اسم الجدول ليكون Users ليتوافق مع المايجريشن القديم
+            modelBuilder.Entity<ApplicationUser>().ToTable("Users");
 
             modelBuilder.Entity<Trip>(entity =>
             {

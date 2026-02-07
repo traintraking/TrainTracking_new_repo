@@ -11,8 +11,9 @@ using TrainTracking.Infrastructure.Services;
 using TrainTracking.Infrastructure.Utilities;
 using TrainTracking.Web.Hubs;
 using TrainTracking.Web.Services;
+using TrainTracking.Domain.Entities;
 
-try 
+try
 {
     Console.WriteLine("[KuwGo] Global Start sequence initiated...");
     
@@ -38,7 +39,8 @@ try
     Console.WriteLine($"[KuwGo] Environment: {builder.Environment.EnvironmentName}");
 
     // Identity Configuration
-    builder.Services.AddIdentity<IdentityUser, IdentityRole>(options => {
+    // Identity Configuration
+    builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
         options.Password.RequireDigit = false;
         options.Password.RequireLowercase = false;
         options.Password.RequireUppercase = false;
@@ -72,7 +74,8 @@ try
 
     builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-
+    builder.Services.AddScoped<IUserRepository, UserRepository>();
+    builder.Services.AddScoped<IUserService, UserService>();
     builder.Services.AddScoped<ITrainRepository, TrainRepository>();
     builder.Services.AddScoped<ITripRepository, TripRepository>();
     builder.Services.AddScoped<IBookingRepository, BookingRepository>();
@@ -142,7 +145,7 @@ try
         try
         {
             var context = services.GetRequiredService<TrainTrackingDbContext>();
-            var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
             
             // Revert to async call but wait to ensure completion for the first user

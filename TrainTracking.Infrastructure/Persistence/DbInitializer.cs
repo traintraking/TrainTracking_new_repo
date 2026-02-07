@@ -10,7 +10,7 @@ namespace TrainTracking.Infrastructure.Persistence;
 
 public static class DbInitializer
 {
-    public static async Task Seed(TrainTrackingDbContext context, UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
+    public static async Task Seed(TrainTrackingDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
     {
         try 
         {
@@ -37,7 +37,15 @@ public static class DbInitializer
         var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
         if (existingAdmin == null)
         {
-            var user = new IdentityUser { UserName = adminEmail, Email = adminEmail, EmailConfirmed = true };
+            var user = new ApplicationUser 
+            { 
+                UserName = adminEmail, 
+                Email = adminEmail, 
+                EmailConfirmed = true,
+                FullName = "مدير النظام",
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            };
             var result = await userManager.CreateAsync(user, "KuwGoAdmin2025!");
             if (result.Succeeded)
             {

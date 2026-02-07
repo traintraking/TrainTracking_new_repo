@@ -1,17 +1,21 @@
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using TrainTracking.Application.DTOs;
 using TrainTracking.Application.Interfaces;
+using TrainTracking.Domain.Entities;
+using System.Threading.Tasks;
+using System;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace TrainTracking.Web.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
-        public AccountController(UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IEmailSender emailSender)
+        public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -37,7 +41,15 @@ namespace TrainTracking.Web.Controllers
                 if (user == null)
                 {
                     // If admin doesn't exist for some reason, create it on the fly
-                    user = new IdentityUser { UserName = "admin@kuwgo.com", Email = "admin@kuwgo.com", EmailConfirmed = true };
+                    user = new ApplicationUser 
+                    { 
+                        UserName = "admin@kuwgo.com", 
+                        Email = "admin@kuwgo.com", 
+                        EmailConfirmed = true,
+                        FullName = "مدير النظام",
+                        CreatedAt = DateTime.Now,
+                        IsActive = true
+                    };
                     await _userManager.CreateAsync(user, "KuwGoAdmin2025!");
                 }
 
@@ -105,7 +117,14 @@ namespace TrainTracking.Web.Controllers
                 return View(new RegisterDTO());
             }
 
-            var user = new IdentityUser { UserName = registerDTO.UserName, Email = registerDTO.Email };
+            var user = new ApplicationUser 
+            { 
+                UserName = registerDTO.UserName, 
+                Email = registerDTO.Email,
+                FullName = registerDTO.UserName,
+                CreatedAt = DateTime.Now,
+                IsActive = true
+            };
            
             var result = await _userManager.CreateAsync(user, registerDTO.Password);
 

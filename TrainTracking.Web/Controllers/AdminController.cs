@@ -20,11 +20,12 @@ namespace TrainTracking.Web.Controllers
         private readonly TrainTrackingDbContext _context;
         private readonly IDateTimeService _dateTimeService;
         private readonly ITripService _tripService;
+        private readonly IUserService _userService;
 
         public AdminController(ITripRepository tripRepository, ITrainRepository trainRepository, 
             IStationRepository stationRepository, IBookingRepository bookingRepository, ISmsService smsService,
             INotificationRepository notificationRepository, TrainTrackingDbContext context, IDateTimeService dateTimeService,
-            ITripService tripService)
+            ITripService tripService, IUserService userService)
         {
             _tripRepository = tripRepository;
             _trainRepository = trainRepository;
@@ -35,6 +36,7 @@ namespace TrainTracking.Web.Controllers
             _context = context;
             _dateTimeService = dateTimeService;
             _tripService = tripService;
+            _userService = userService;
         }
 
         public async Task<IActionResult> Index()
@@ -54,7 +56,7 @@ namespace TrainTracking.Web.Controllers
             ViewBag.ActiveTrips = await _context.Trips
                 .Where(t => t.DepartureTime > now && t.Status != TripStatus.Completed)
                 .CountAsync();
-            ViewBag.TotalUsers = await _context.Users.CountAsync();
+            ViewBag.TotalUsers = await _userService.GetTotalUsersCountAsync();
 
             // Recent Bookings
             var recentBookings = await _context.Bookings

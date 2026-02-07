@@ -72,6 +72,10 @@
                         <li class="nav-item mx-2"><a class="nav-link py-3 fw-semibold @(Context.Request.Path == "/" ? "text-primary border-bottom border-primary" : "")" asp-controller="Home" asp-action="Index">@Localizer["Home"]</a></li>
                         <li class="nav-item mx-2"><a class="nav-link py-3 fw-semibold @(Context.Request.Path.StartsWithSegments("/Trips") && Context.Request.Path != "/Trips/Live" ? "text-primary border-bottom border-primary" : "")" asp-controller="Trips" asp-action="Index">@Localizer["Trips"]</a></li>
                         <li class="nav-item mx-2"><a class="nav-link py-3 fw-bold text-success @(Context.Request.Path == "/Trips/Live" ? "border-bottom border-success" : "")" asp-controller="Trips" asp-action="Live"><i class="fas fa-satellite-dish me-1"></i> @Localizer["LiveTracking"]</a></li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item mx-2"><a class="nav-link py-3 fw-semibold @(Context.Request.Path.StartsWithSegments("/Profile") ? "text-primary border-bottom border-primary" : "")" asp-controller="Profile" asp-action="Index"><i class="fas fa-user me-1"></i> @Localizer["Profile"]</a></li>
+                        }
                     </ul>
                 </div>
 
@@ -146,6 +150,10 @@
                 <div class="list-group list-group-flush py-2 text-@(isRTL ? "start" : "start")">
                     @if (User.Identity?.IsAuthenticated == true)
                     {
+                        <a asp-controller="Profile" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
+                            <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-user"></i></div>
+                            @Localizer["Profile"]
+                        </a>
                         <a asp-controller="Bookings" asp-action="MyBookings" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
                             <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-warning"><i class="fas fa-ticket-alt"></i></div>
                             @Localizer["MyBookings"]
