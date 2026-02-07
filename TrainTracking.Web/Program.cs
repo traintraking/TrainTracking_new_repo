@@ -71,7 +71,6 @@ try
     //    builder.Configuration.GetConnectionString("DefaultConnection")
     //));
 
-
     builder.Services.AddTransient<IEmailSender, EmailSender>();
 
     builder.Services.AddScoped<IUserRepository, UserRepository>();

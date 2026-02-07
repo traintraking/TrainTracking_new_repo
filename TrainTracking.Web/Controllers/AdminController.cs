@@ -453,6 +453,19 @@ namespace TrainTracking.Web.Controllers
             return View(notifications);
         }
 
+        public async Task<IActionResult> AllBookings()
+        {
+            var bookings = await _context.Bookings
+                .Include(b => b.Trip)
+                .ThenInclude(t => t.FromStation)
+                .Include(b => b.Trip)
+                .ThenInclude(t => t.ToStation)
+                .OrderByDescending(b => b.BookingDate)
+                .ToListAsync();
+
+            return View(bookings);
+        }
+
         private async Task PurgeStaleTrips()
         {
             try

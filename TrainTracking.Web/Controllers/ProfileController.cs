@@ -75,6 +75,7 @@ namespace TrainTracking.Web.Controllers
 
                     // تحديث الحقول المسموح بتعديلها في البروفايل
                     user.FullName = model.FullName;
+                    user.NationalId = model.NationalId;
                     user.PhoneNumber = model.PhoneNumber;
                     user.Bio = model.Bio;
                     user.Address = model.Address;

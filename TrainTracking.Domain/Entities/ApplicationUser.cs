@@ -11,6 +11,9 @@ namespace TrainTracking.Domain.Entities
         [StringLength(100)]
         public string? FullName { get; set; }
 
+        [StringLength(14, MinimumLength = 14, ErrorMessage = "الرقم القومي يجب أن يتكون من 14 رقم")]
+        public string? NationalId { get; set; }
+
         public string? ProfilePicturePath { get; set; }
 
         [StringLength(500)]

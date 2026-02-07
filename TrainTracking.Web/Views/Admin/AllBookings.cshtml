@@ -1,0 +1,129 @@
+@model List<TrainTracking.Domain.Entities.Booking>
+@{
+    ViewData["Title"] = "كل العمليات";
+}
+
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-1 text-primary">كل الحجوزات والعمليات</h2>
+            <p class="text-muted mb-0"><i class="fas fa-list me-1"></i> عرض سجل العمليات المكتملة في النظام</p>
+        </div>
+        <a asp-action="Index" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fas fa-arrow-right me-2"></i> العودة للوحة التحكم
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-top border-primary border-4">
+        <div class="card-header bg-white p-4 border-0 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">سجل العمليات الكامل</h5>
+            <div class="d-flex gap-2">
+                <input type="text" id="bookingSearch" class="form-control form-control-sm rounded-pill px-3" placeholder="بحث باسم المسافر..." onkeyup="filterBookings()">
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="bookingsTable">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="px-4 py-3">المسافر</th>
+                        <th class="px-3 py-3">الوجهة</th>
+                        <th class="px-3 py-3 text-center">المقعد</th>
+                        <th class="px-3 py-3">المبلغ</th>
+                        <th class="px-3 py-3">الحالة</th>
+                        <th class="px-3 py-3">التوقيت</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var booking in Model)
+                    {
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-circle me-3">@booking.PassengerName.Substring(0,1)</div>
+                                    <div>
+                                        <div class="fw-bold passenger-name">@booking.PassengerName</div>
+                                        <div class="small text-muted">@booking.PassengerPhone</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-3 py-3">
+                                <div class="small fw-semibold">@(booking.Trip?.FromStation?.Name ?? "N/A")</div>
+                                <div class="text-primary small"><i class="fas fa-arrow-left fa-xs px-1"></i> @(booking.Trip?.ToStation?.Name ?? "N/A")</div>
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                <span class="badge bg-light text-dark border">@booking.SeatNumber</span>
+                            </td>
+                            <td class="px-3 py-3 fw-bold text-primary">@booking.Price.ToString("N3") <span class="small font-normal text-muted">د.ك</span></td>
+                            <td class="px-3 py-3">
+                                @if (booking.Status == TrainTracking.Domain.Enums.BookingStatus.Confirmed)
+                                {
+                                    <span class="badge rounded-pill bg-soft-success text-success px-3 py-2">
+                                        <i class="fas fa-check-circle me-1"></i> مؤكد
+                                    </span>
+                                }
+                                else if (booking.Status == TrainTracking.Domain.Enums.BookingStatus.Cancelled)
+                                {
+                                    <span class="badge rounded-pill bg-soft-danger text-danger px-3 py-2">
+                                        <i class="fas fa-times-circle me-1"></i> ملغي
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge rounded-pill bg-soft-warning text-warning px-3 py-2">
+                                        <i class="fas fa-clock me-1"></i> قيد الانتظار
+                                    </span>
+                                }
+                            </td>
+                            <td class="px-3 py-3 text-muted small">
+                                <div>@booking.BookingDate.ToString("dd/MM/yyyy")</div>
+                                <div>@booking.BookingDate.ToString("HH:mm")</div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-success { background-color: rgba(40, 167, 69, 0.1); }
+    .bg-soft-danger { background-color: rgba(220, 53, 69, 0.1); }
+    .bg-soft-warning { background-color: rgba(255, 193, 7, 0.1); }
+    
+    .avatar-circle { 
+        width: 40px; 
+        height: 40px; 
+        background: #eee; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; 
+        font-weight: bold; 
+        color: #555;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function filterBookings() {
+            var input, filter, table, tr, td, i, txtValue;
+            input = document.getElementById("bookingSearch");
+            filter = input.value.toUpperCase();
+            table = document.getElementById("bookingsTable");
+            tr = table.getElementsByTagName("tr");
+
+            for (i = 1; i < tr.length; i++) {
+                td = tr[i].getElementsByClassName("passenger-name")[0];
+                if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+}
