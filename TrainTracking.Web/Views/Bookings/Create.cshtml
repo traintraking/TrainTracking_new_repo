@@ -227,13 +227,10 @@
                         <input asp-for="PassengerName" class="form-control" placeholder="الاسم الكامل" required />
                     </div>
 
-                    @if (ViewBag.HasValidPhone != true)
-                    {
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold" style="color:#6c757d;">رقم الهاتف</label>
-                            <input asp-for="PassengerPhone" class="form-control" placeholder="00000000" />
-                        </div>
-                    }
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold" style="color:#6c757d;">رقم الهاتف</label>
+                        <input asp-for="PassengerPhone" class="form-control" placeholder="00000000" value="@ViewBag.UserPhone" />
+                    </div>
 
                     <div class="p-3 bg-light rounded-3 mb-4">
                         <div class="d-flex justify-content-between mb-2">

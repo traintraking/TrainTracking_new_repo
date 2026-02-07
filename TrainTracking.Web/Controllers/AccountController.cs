@@ -148,7 +148,7 @@ namespace TrainTracking.Web.Controllers
                 , $"<h1>Confirm Your Email By Clicking <a href='{link}'>Here</a></h1>");
 
             
-
+            TempData["info"] = "تم إنشاء الحساب بنجاح! يرجى التحقق من بريدك الإلكتروني لتفعيل حسابك قبل تسجيل الدخول.";
             return RedirectToAction("Login");
         }
 

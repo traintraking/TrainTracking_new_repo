@@ -46,6 +46,9 @@ try
         options.Password.RequireUppercase = false;
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequiredLength = 6;
+        
+        // Allow all characters in UserName (including Arabic and spaces)
+        options.User.AllowedUserNameCharacters = null;
     })
     .AddEntityFrameworkStores<TrainTrackingDbContext>()
     .AddDefaultTokenProviders();

@@ -103,6 +103,7 @@ namespace TrainTracking.Web.Controllers
             bool hasPhone = !string.IsNullOrEmpty(user?.PhoneNumber);
 
             ViewBag.HasValidPhone = hasPhone;
+            ViewBag.UserPhone = hasPhone ? user!.PhoneNumber : "";
 
             var booking = new Booking
             {
