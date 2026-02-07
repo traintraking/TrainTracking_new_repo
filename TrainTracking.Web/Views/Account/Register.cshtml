@@ -245,6 +245,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="form-label">الرقم القومي</label>
+                    <div class="input-group">
+                        <input asp-for="NationalId" type="text" class="form-control"
+                               placeholder="14 رقم" maxlength="14" dir="ltr" style="text-align: right;" />
+                        <span asp-validation-for="NationalId" class="text-danger"></span>
+                        <i class="fas fa-id-card input-icon"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label class="form-label">كلمة المرور</label>
                     <div class="input-group">
                         <input asp-for="Password" type="password" class="form-control" placeholder="••••••••" required dir="ltr" style="text-align: right;">

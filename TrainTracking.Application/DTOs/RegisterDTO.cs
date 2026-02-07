@@ -23,5 +23,9 @@ namespace TrainTracking.Application.DTOs
         public string Password { get; set; } = string.Empty;
         [Required, DataType(DataType.Password), Compare(nameof(Password))]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "الرقم القومي مطلوب")]
+        [StringLength(14, MinimumLength = 14, ErrorMessage = "الرقم القومي يجب أن يتكون من 14 رقم")]
+        public string NationalId { get; set; } = string.Empty;
     }
 }

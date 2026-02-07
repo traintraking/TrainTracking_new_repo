@@ -18,139 +18,194 @@ namespace TrainTracking.Web.Services
             _webHostEnvironment = webHostEnvironment;
         }
 
-        public byte[] GenerateMultipleTicketsPdf(List<Booking> bookings, string baseUrl)
+        public byte[] GenerateMultipleTicketsPdf(List<Booking> bookings, string baseUrl, Dictionary<string, string> userNationalIds)
         {
             string logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
             byte[]? logoImage = File.Exists(logoPath) ? File.ReadAllBytes(logoPath) : null;
 
             var document = QuestPDF.Fluent.Document.Create(container =>
             {
-                // نمر على كل حجز وننشئ له صفحة منفصلة داخل الملف
                 foreach (var booking in bookings)
                 {
-                    // توليد رابط الـ QR الخاص بهذا المقعد تحديداً
                     string qrUrl = $"{baseUrl}/Bookings/TicketDetails/{booking.Id}";
                     byte[] qrCodeImage = GenerateQrCode(qrUrl);
+                    string bookingIdShort = booking.Id.ToString().Substring(0, 8).ToUpper();
+                    string nationalId = userNationalIds.ContainsKey(booking.UserId) ? userNationalIds[booking.UserId] : "";
 
                     container.Page(page =>
                     {
                         page.Size(PageSizes.A5.Landscape());
                         page.Margin(0);
                         page.PageColor(Colors.White);
-                        page.DefaultTextStyle(x => x.FontSize(10).FontFamily("Arial"));
+                        
+                        // Set global text style - attempting to use a standard font that supports some Arabic if possible, 
+                        // though QuestPDF default fonts might have limits. Fallback to common sans-serif.
+                        page.DefaultTextStyle(x => x.FontSize(10).FontFamily(Fonts.Arial));
 
                         page.Content().Element(content =>
                         {
-                            content.ContentFromRightToLeft().Column(col =>
+                            // Use minimal column to ensure content fits
+                            content.Column(col =>
                             {
                                 // --- Header Section ---
-                                col.Item().Height(80).Background("#1e3c72").PaddingHorizontal(20).Row(row =>
+                                // Reduced height to 80
+                                col.Item().Height(80).Background("#1a3c6e").PaddingHorizontal(20).Row(row =>
                                 {
-                                    row.RelativeItem().Column(c =>
-                                    {
-                                        c.Item().Text(text =>
-                                        {
-                                            text.Span("KuwGo").FontSize(20).Bold().FontColor(Colors.White);
-                                        });
-                                        c.Item().Text("OFFICIAL E-TICKET").FontSize(10).LetterSpacing(2).FontColor(Colors.Grey.Lighten3);
-                                    });
-
+                                    // 1. Logo (Left)
                                     if (logoImage != null)
-                                        row.ConstantItem(100).AlignRight().AlignMiddle().Image(logoImage).FitArea();
+                                    {
+                                        row.ConstantItem(60).AlignMiddle().Image(logoImage).FitArea();
+                                    }
                                     else
-                                        row.ConstantItem(60).AlignRight().AlignMiddle().Text("KUW").FontSize(25).FontColor(Colors.White).Bold();
+                                    {
+                                        row.ConstantItem(60).AlignMiddle().Text("KUW").FontSize(22).Bold().FontColor(Colors.White);
+                                    }
+                                    
+                                    // 2. Center Text "OFFICIAL E-TICKET"
+                                    row.RelativeItem().AlignMiddle().AlignCenter().Text("OFFICIAL E-TICKET").FontSize(12).Medium().FontColor(Colors.White);
+
+                                    // 3. Brand Name (Right) "KuwGo"
+                                    row.ConstantItem(100).AlignMiddle().AlignRight().Text("KuwGo").FontSize(24).Bold().FontColor(Colors.White);
                                 });
 
                                 // --- Main Body ---
-                                col.Item().Padding(25).Row(mainRow =>
+                                // Restored padding to 40 for better spacing
+                                col.Item().Padding(40).Row(mainRow =>
                                 {
-                                    // Left Side: QR & ID
-                                    mainRow.ConstantItem(120).Column(c =>
+                                    // Left Side: Data
+                                    mainRow.RelativeItem(2).Column(details =>
                                     {
-                                        c.Item().AlignCenter().Image(qrCodeImage).FitArea();
-                                        c.Item().PaddingTop(10).AlignCenter().Text($"ID: {booking.Id.ToString().Substring(0, 8).ToUpper()}").FontSize(8).Bold();
-                                        c.Item().AlignCenter().Text("Scan to verify").FontSize(6).FontColor(Colors.Grey.Medium);
-                                    });
-
-                                    mainRow.ConstantItem(20);
-
-                                    // Right Side: Details
-                                    mainRow.RelativeItem().Column(details =>
-                                    {
-                                        if (booking.Trip != null)
+                                        // Row 1: Date & Passenger
+                                        details.Item().Row(r =>
                                         {
-                                            // Row 1: Passenger
-                                            details.Item().Row(r =>
+                                            // Date (Left)
+                                            r.RelativeItem().Column(c =>
                                             {
-                                                r.RelativeItem().Column(c =>
-                                                {
-                                                    c.Item().Text("المسافر / Passenger").FontSize(8).FontColor(Colors.Grey.Medium);
-                                                    c.Item().Text(booking.PassengerName ?? "Unknown").FontSize(14).Bold().FontColor("#2c3e50");
+                                                c.Item().Text(t => {
+                                                    t.Span("Date / ").FontSize(9).FontColor(Colors.Grey.Medium);
+                                                    t.Span("التاريخ").FontSize(9).FontColor(Colors.Grey.Medium);
                                                 });
-
-                                                r.RelativeItem().Column(c =>
-                                                {
-                                                    c.Item().Text("التاريخ / Date").FontSize(8).FontColor(Colors.Grey.Medium);
-                                                    c.Item().Text(booking.Trip.DepartureTime.ToString("yyyy-MM-dd")).FontSize(14).Bold().FontColor("#2c3e50");
-                                                });
+                                                c.Item().Text(booking.Trip.DepartureTime.ToString("yyyy-MM-dd")).FontSize(14).Bold().FontColor("#1a3c6e");
                                             });
 
-                                            details.Item().PaddingVertical(15).LineHorizontal(1).LineColor(Colors.Grey.Lighten3);
-
-                                            // Row 2: Journey
-                                            details.Item().Row(r =>
+                                            // Passenger (Right)
+                                            r.RelativeItem().AlignRight().Column(c =>
                                             {
-                                                r.RelativeItem().Column(c =>
-                                                {
-                                                    c.Item().Text("من / From").FontSize(8).FontColor(Colors.Grey.Medium);
-                                                    c.Item().Text(booking.Trip.FromStation?.Name ?? "Unknown").FontSize(16).Bold().FontColor("#e74c3c");
-                                                    c.Item().Text(booking.Trip.DepartureTime.ToString("HH:mm")).FontSize(12);
+                                                c.Item().AlignRight().Text(t => {
+                                                    t.Span("Passenger / ").FontSize(9).FontColor(Colors.Grey.Medium);
+                                                    t.Span("المسافر").FontSize(9).FontColor(Colors.Grey.Medium);
                                                 });
-
-                                                r.ConstantItem(40).AlignCenter().PaddingTop(10).Text("-->").FontSize(20).FontColor(Colors.Grey.Medium);
-
-                                                r.RelativeItem().Column(c =>
+                                                c.Item().AlignRight().Text(booking.PassengerName ?? "Unknown").FontSize(14).Bold().FontColor("#1a3c6e");
+                                                
+                                                if (!string.IsNullOrEmpty(nationalId))
                                                 {
-                                                    c.Item().Text("إلى / To").FontSize(8).FontColor(Colors.Grey.Medium);
-                                                    c.Item().Text(booking.Trip.ToStation?.Name ?? "Unknown").FontSize(16).Bold().FontColor("#e74c3c");
-                                                    c.Item().Text(booking.Trip.ArrivalTime.ToString("HH:mm")).FontSize(12);
+                                                    c.Item().AlignRight().Text($"ID: {nationalId}").FontSize(9).FontColor(Colors.Grey.Darken2);
+                                                }
+                                            });
+                                        });
+
+                                        // Restored vertical padding
+                                        details.Item().PaddingVertical(20).LineHorizontal(1).LineColor(Colors.Grey.Lighten4);
+
+                                        // Row 2: To & From
+                                        details.Item().Row(r =>
+                                        {
+                                            // To (Left)
+                                            r.RelativeItem(2).Column(c =>
+                                            {
+                                                c.Item().Text(t => {
+                                                    t.Span("To / ").FontSize(9).FontColor(Colors.Grey.Medium);
+                                                    t.Span("إلى").FontSize(9).FontColor(Colors.Grey.Medium);
                                                 });
+                                                c.Item().Text(booking.Trip.ToStation?.Name ?? "Unknown").FontSize(16).Bold().FontColor("#e74c3c");
+                                                c.Item().Text(booking.Trip.ArrivalTime.ToString("HH:mm")).FontSize(12);
                                             });
 
-                                            details.Item().PaddingVertical(15).LineHorizontal(1).LineColor(Colors.Grey.Lighten3);
+                                            // Arrow (Center)
+                                            r.RelativeItem(1).AlignMiddle().AlignCenter().Text("<---").FontSize(14).Bold().FontColor(Colors.Grey.Medium);
 
-                                            // Row 3: Train Info
-                                            details.Item().Row(r =>
+                                            // From (Right)
+                                            r.RelativeItem(2).AlignRight().Column(c =>
                                             {
-                                                r.RelativeItem().Column(c =>
-                                                {
-                                                    c.Item().Text("القطار / Train").FontSize(8).FontColor(Colors.Grey.Medium);
-                                                    c.Item().Text(booking.Trip.Train?.TrainNumber ?? "Unknown").FontSize(12).Bold();
+                                                c.Item().AlignRight().Text(t => {
+                                                    t.Span("From / ").FontSize(9).FontColor(Colors.Grey.Medium);
+                                                    t.Span("من").FontSize(9).FontColor(Colors.Grey.Medium);
                                                 });
-
-                                                r.RelativeItem().Column(c =>
-                                                {
-                                                    c.Item().Text("المقعد / Seat").FontSize(8).FontColor(Colors.Grey.Medium);
-                                                    c.Item().Text(booking.SeatNumber.ToString()).FontSize(12).Bold();
-                                                });
-
-                                                r.RelativeItem().Column(c =>
-                                                {
-                                                    c.Item().Text("السعر / Price").FontSize(8).FontColor(Colors.Grey.Medium);
-                                                    c.Item().Text($"{booking.Price:F2} KD").FontSize(12).Bold();
-                                                });
+                                                c.Item().AlignRight().Text(booking.Trip.FromStation?.Name ?? "Unknown").FontSize(16).Bold().FontColor("#e74c3c");
+                                                c.Item().AlignRight().Text(booking.Trip.DepartureTime.ToString("HH:mm")).FontSize(12);
                                             });
-                                        }
+                                        });
+
+                                        // Restored vertical padding
+                                        details.Item().PaddingVertical(20).LineHorizontal(1).LineColor(Colors.Grey.Lighten4);
+
+                                        // Row 3: Price, Seat, Carriage, Train
+                                        details.Item().Row(r =>
+                                        {
+                                            // Price
+                                            r.RelativeItem().Column(c =>
+                                            {
+                                                c.Item().AlignCenter().Text(t => {
+                                                    t.Span("Price / ").FontSize(8).FontColor(Colors.Grey.Medium);
+                                                    t.Span("السعر").FontSize(8).FontColor(Colors.Grey.Medium);
+                                                });
+                                                c.Item().AlignCenter().Text($"DK {booking.Price:F3}").FontSize(12).Bold();
+                                            });
+                                            // Seat
+                                            r.RelativeItem().Column(c =>
+                                            {
+                                                c.Item().AlignCenter().Text(t => {
+                                                    t.Span("Seat / ").FontSize(8).FontColor(Colors.Grey.Medium);
+                                                    t.Span("المقعد").FontSize(8).FontColor(Colors.Grey.Medium);
+                                                });
+                                                c.Item().AlignCenter().Text(booking.SeatNumber.ToString()).FontSize(12).Bold();
+                                            });
+                                            // Carriage (New)
+                                            r.RelativeItem().Column(c =>
+                                            {
+                                                // Simple logic for Carriage: assuming 60 seats per carriage. 
+                                                int carriageNum = ((booking.SeatNumber - 1) / 20) + 1;
+                                                c.Item().AlignCenter().Text(t => {
+                                                    t.Span("Carriage / ").FontSize(8).FontColor(Colors.Grey.Medium);
+                                                    t.Span("عربة").FontSize(8).FontColor(Colors.Grey.Medium);
+                                                });
+                                                c.Item().AlignCenter().Text(carriageNum.ToString()).FontSize(12).Bold();
+                                            });
+                                            // Train
+                                            r.RelativeItem().Column(c =>
+                                            {
+                                                c.Item().AlignCenter().Text(t => {
+                                                    t.Span("Train / ").FontSize(8).FontColor(Colors.Grey.Medium);
+                                                    t.Span("القطار").FontSize(8).FontColor(Colors.Grey.Medium);
+                                                });
+                                                c.Item().AlignCenter().Text(booking.Trip.Train?.TrainNumber ?? "N/A").FontSize(12).Bold();
+                                            });
+                                        });
+                                    });
+
+                                    // Right Side: QR Code
+                                    // Add a dashed border to the left of this column
+                                    mainRow.RelativeItem(1).PaddingLeft(15).BorderLeft(1).BorderColor(Colors.Grey.Lighten2).Column(qrCol =>
+                                    {
+                                        qrCol.Item().AlignCenter().PaddingTop(10).Width(100).Image(qrCodeImage);
+                                        qrCol.Item().PaddingTop(5).AlignCenter().Text($"ID: {bookingIdShort}").FontSize(9).Bold();
+                                        qrCol.Item().AlignCenter().Text("Scan to verify").FontSize(6).FontColor(Colors.Grey.Medium);
                                     });
                                 });
-
-                                // --- Footer ---
-                                col.Item().Background(Colors.Grey.Lighten5).Padding(10).AlignCenter().Row(row =>
-                                {
-                                    row.RelativeItem().AlignCenter().Text("نتمنى لكم رحلة سعيدة - Have a safe trip").FontSize(8).Italic().FontColor(Colors.Grey.Darken1);
-                                });
-                                col.Item().Height(5).Background("#2ecc71");
                             });
+                        });
+                        
+                        page.Footer().Column(col => 
+                        {
+                             // --- Footer ---
+                            col.Item().Background(Colors.Grey.Lighten5).Padding(10).AlignCenter().Text(t =>
+                            {
+                                t.Span("Have a safe trip - ").Italic().FontColor(Colors.Grey.Medium);
+                                t.Span("نتمنى لكم رحلة آمنة وسعيدة"); 
+                            });
+                            
+                            // Bottom Green Bar
+                            col.Item().Height(10).Background("#2ecc71");
                         });
                     });
                 }

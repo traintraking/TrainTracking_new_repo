@@ -123,6 +123,7 @@ namespace TrainTracking.Web.Controllers
                 UserName = registerDTO.UserName, 
                 Email = registerDTO.Email,
                 FullName = registerDTO.UserName,
+                NationalId = registerDTO.NationalId,
                 CreatedAt = DateTime.Now,
                 IsActive = true
             };

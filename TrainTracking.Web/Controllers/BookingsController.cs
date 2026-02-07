@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 using TrainTracking.Application.Interfaces;
 using TrainTracking.Application.Services;
@@ -20,11 +21,13 @@ namespace TrainTracking.Web.Controllers
         private readonly IDateTimeService _dateTimeService;
         private readonly IVirtualSegmentService _virtualSegmentService;
         private readonly IStationRepository _stationRepository;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public BookingsController(IBookingRepository bookingRepository, ITripRepository tripRepository, 
             Services.TicketGenerator ticketGenerator, IEmailService emailService, ISmsService smsService,
             INotificationRepository notificationRepository, IDateTimeService dateTimeService,
-            IVirtualSegmentService virtualSegmentService, IStationRepository stationRepository)
+            IVirtualSegmentService virtualSegmentService, IStationRepository stationRepository,
+            UserManager<ApplicationUser> userManager)
         {
             _bookingRepository = bookingRepository;
             _tripRepository = tripRepository;
@@ -35,6 +38,7 @@ namespace TrainTracking.Web.Controllers
             _dateTimeService = dateTimeService;
             _virtualSegmentService = virtualSegmentService;
             _stationRepository = stationRepository;
+            _userManager = userManager;
         }
         private decimal CalculateSeatPrice(int seatNumber, decimal basePrice)
         {
@@ -93,13 +97,23 @@ namespace TrainTracking.Web.Controllers
             ViewBag.SegmentDepartureTime = segmentDepartureTime;
             ViewBag.SegmentArrivalTime = segmentArrivalTime;
 
+            // جلب بيانات المستخدم الحالي
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
+            bool hasPhone = !string.IsNullOrEmpty(user?.PhoneNumber);
+
+            ViewBag.HasValidPhone = hasPhone;
+
             var booking = new Booking
             {
                 TripId = targetId.Value,
                 Trip = trip,
                 FromStationId = effectiveFromId,
                 ToStationId = effectiveToId,
-                Price = segmentPrice
+                Price = segmentPrice,
+                // نملأ البيانات تلقائياً من البروفايل
+                PassengerName = user?.FullName ?? "",
+                PassengerPhone = hasPhone ? user!.PhoneNumber! : ""
             };
 
             return View(booking);
@@ -117,6 +131,15 @@ namespace TrainTracking.Web.Controllers
             ModelState.Remove("UserId");
             ModelState.Remove("FromStation");
             ModelState.Remove("ToStation");
+
+            // التعامل مع رقم الهاتف المخفي
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
+            if (string.IsNullOrEmpty(booking.PassengerPhone) && !string.IsNullOrEmpty(user?.PhoneNumber))
+            {
+                booking.PassengerPhone = user.PhoneNumber;
+                ModelState.Remove("PassengerPhone");
+            }
 
             var trip = await _tripRepository.GetTripWithStationsAsync(booking.TripId);
             var fromStation = await _stationRepository.GetByIdAsync(booking.FromStationId);
@@ -418,6 +441,8 @@ namespace TrainTracking.Web.Controllers
             bool isAuthenticated = User.Identity?.IsAuthenticated ?? false;
             bool isAdmin = isAuthenticated && User.IsInRole("Admin");
 
+            var nationalIds = new Dictionary<string, string>();
+
             // 2. جلب الحجوزات والتحقق من الصلاحيات لكل حجز
             foreach (var id in bookingIds)
             {
@@ -425,11 +450,21 @@ namespace TrainTracking.Web.Controllers
                 if (booking == null) continue;
 
                 bool isOwner = (isAuthenticated && booking.UserId == userId);
-                bool isAnonymousBooking = string.IsNullOrEmpty(booking.UserId) || booking.UserId == "Anonymous";
+                bool isAnonymousBooking = string.IsNullOrEmpty(booking.UserId) || booking.UserId == "Anonymous" || booking.UserId == "Guest";
 
                 if (isOwner || isAnonymousBooking || isAdmin)
                 {
                     bookings.Add(booking);
+
+                    // Fetch National ID if we haven't already and UserId is likely valid
+                    if (!string.IsNullOrEmpty(booking.UserId) && !nationalIds.ContainsKey(booking.UserId) && booking.UserId != "Guest" && booking.UserId != "Anonymous")
+                    {
+                        var user = await _userManager.FindByIdAsync(booking.UserId);
+                        if (user != null && !string.IsNullOrEmpty(user.NationalId))
+                        {
+                            nationalIds[booking.UserId] = user.NationalId;
+                        }
+                    }
                 }
             }
 
@@ -456,15 +491,8 @@ namespace TrainTracking.Web.Controllers
 
             var baseUrl = $"{scheme}://{host}";
 
-            // إنشاء قائمة تحتوي على بيانات الحجز مع رابط الـ QR الخاص به
-            var ticketsData = bookings.Select(b => new {
-                Booking = b,
-                QrUrl = $"{baseUrl}/Bookings/TicketDetails/{b.Id}"
-            }).ToList();
-
             // 4. استدعاء المولد لإنشاء ملف PDF واحد يحتوي على كل التذاكر
-            // ملاحظة: يجب تعديل ميثود GenerateTicketPdf في الـ Service لتقبل قائمة أو عمل ميثود جديدة
-            var pdf = _ticketGenerator.GenerateMultipleTicketsPdf(bookings, baseUrl);
+            var pdf = _ticketGenerator.GenerateMultipleTicketsPdf(bookings, baseUrl, nationalIds);
 
             // إرجاع الملف باسم معبر
             string fileName = bookings.Count > 1 ? $"Tickets-Group-{DateTime.Now:yyyyMMdd}.pdf" : $"Ticket-{bookings[0].Id.ToString()[..8]}.pdf";

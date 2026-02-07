@@ -1,4 +1,7 @@
 @model TrainTracking.Domain.Entities.Booking
+@using Microsoft.AspNetCore.Identity
+@using TrainTracking.Domain.Entities
+@inject UserManager<ApplicationUser> UserManager
 
 @{
     Layout = null;
@@ -89,92 +92,95 @@
         }
     </style>
 </head>
-<body class="d-flex align-items-center justify-content-center min-vh-100 p-3">
-    <div class="container" style="max-width: 500px;">
-        <div class="ticket-card">
-            @{
-                var statusClass = Model.Status switch
-                {
-                    TrainTracking.Domain.Enums.BookingStatus.Confirmed => "bg-confirmed",
-                    TrainTracking.Domain.Enums.BookingStatus.Cancelled => "bg-cancelled",
-                    _ => "bg-pending"
-                };
-                var statusText = Model.Status switch
-                {
-                    TrainTracking.Domain.Enums.BookingStatus.Confirmed => "مؤكد ✅",
-                    TrainTracking.Domain.Enums.BookingStatus.Cancelled => "ملغي ❌",
-                    _ => "قيد المعالجة ⏳"
-                };
-            }
-            <div class="status-badge @statusClass">
-                @statusText
+<body class="d-flex align-items-center justify-content-center min-vh-100 p-0 m-0" style="background-color: #333;">
+    <div class="ticket-container bg-white position-relative overflow-hidden" style="width: 800px; max-width: 100%; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
+        
+        <!-- Header -->
+        <div class="ticket-header d-flex justify-content-between align-items-center px-4 py-3" style="background-color: #1a3c6e; height: 120px;">
+            <div class="bg-white p-2 d-flex align-items-center justify-content-center" style="width: 100px; height: 100%;">
+                <img src="/images/logo.png" alt="KuwGo" style="max-width: 80%; max-height: 80%;">
             </div>
-
-            <div class="ticket-header">
-                <div class="train-icon-bg">
-                    <i class="fas fa-train fa-2x"></i>
-                </div>
-                <h4 class="mb-1 fw-bold">تذكرة سفر إلكترونية</h4>
-                <p class="mb-0 opacity-75 small">KuwGo Inc. - Kuwait Railways</p>
+            <div class="text-white text-center flex-grow-1" style="letter-spacing: 5px; font-weight: 300; font-size: 1.2rem;">
+                OFFICIAL E-TICKET
             </div>
-
-            <div class="ticket-body">
-                <div class="text-center mb-4">
-                    <div class="info-label">المسافر</div>
-                    <div class="info-value fs-4">@Model.PassengerName</div>
-                </div>
-
-                <div class="row text-center mb-3">
-                    <div class="col-6">
-                        <div class="info-label">من</div>
-                        <div class="info-value text-primary">@(Model.Trip?.FromStation?.Name ?? "غير محدد")</div>
-                        <div class="small text-muted">@(Model.Trip?.DepartureTime.ToString("HH:mm") ?? "--:--")</div>
-                    </div>
-                    <div class="col-6">
-                        <div class="info-label">إلى</div>
-                        <div class="info-value text-primary">@(Model.Trip?.ToStation?.Name ?? "غير محدد")</div>
-                        <div class="small text-muted">@(Model.Trip?.ArrivalTime.ToString("HH:mm") ?? "--:--")</div>
-                    </div>
-                </div>
-
-                <div class="dashed-line"></div>
-
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="p-3 bg-light rounded-3 text-center">
-                            <div class="info-label">رقم القطار</div>
-                            <div class="info-value">@(Model.Trip?.Train?.TrainNumber ?? "N/A")</div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-3 bg-light rounded-3 text-center">
-                            <div class="info-label">المقعد</div>
-                            <div class="info-value">@Model.SeatNumber</div>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-3 bg-light rounded-3 text-center">
-                            <div class="info-label">التاريخ</div>
-                            <div class="info-value small">@(Model.Trip?.DepartureTime.ToString("yyyy-MM-dd") ?? "--")</div>
-                        </div>
-                    </div>
-                     <div class="col-6">
-                        <div class="p-3 bg-light rounded-3 text-center">
-                            <div class="info-label">رقم الحجز</div>
-                            <div class="info-value small">#@Model.Id.ToString().Substring(0, 8).ToUpper()</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-center mt-4">
-                     <p class="text-muted small mb-0">نتمنى لكم رحلة سعيدة وآمنة!</p>
-                </div>
-            </div>
-            
-            <div class="bg-light p-3 text-center border-top">
-                <small class="text-muted fw-bold">www.kuwgo.com</small>
+            <div class="text-white text-end">
+                <h2 class="m-0 fw-bold" style="font-size: 2.5rem;">KuwGo</h2>
             </div>
         </div>
+
+        <!-- Body -->
+        <div class="ticket-content p-5">
+            <div class="row">
+                <!-- Data Columns -->
+                <div class="col-8">
+                    <!-- Row 1: Date & Passenger Name -->
+                    <div class="row mb-4 border-bottom pb-4" style="border-color: #eee !important;">
+                        <div class="col-6 text-start">
+                            <div class="text-muted small mb-1" style="font-size: 0.8rem;">التاريخ / etaD</div>
+                            <div class="fw-bold fs-4" style="color: #1a3c6e;">@(Model.Trip?.DepartureTime.ToString("yyyy-MM-dd") ?? "--")</div>
+                        </div>
+                        <div class="col-6 text-end">
+                            <div class="text-muted small mb-1" style="font-size: 0.8rem;">المسافر / regnessaP</div>
+                            <div class="fw-bold fs-4" style="color: #1a3c6e;">@Model.PassengerName</div>
+                             @{
+                                var user = await UserManager.FindByIdAsync(Model.UserId);
+                                if (user != null && !string.IsNullOrEmpty(user.NationalId))
+                                {
+                                    <div class="small text-muted mt-1" style="font-size: 0.75rem;">ID: @user.NationalId</div>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Stations -->
+                    <div class="row mb-4 border-bottom pb-4" style="border-color: #eee !important;">
+                         <div class="col-6 text-start">
+                            <div class="text-muted small mb-1" style="font-size: 0.8rem;">إلى / oT</div>
+                            <div class="fw-bold fs-3 text-danger">@(Model.Trip?.ToStation?.Name ?? "غير محدد") <span class="text-muted fs-5">--></span></div>
+                             <div class="fs-4">@(Model.Trip?.ArrivalTime.ToString("HH:mm") ?? "--:--")</div>
+                        </div>
+                        <div class="col-6 text-end">
+                            <div class="text-muted small mb-1" style="font-size: 0.8rem;">من / morF</div>
+                            <div class="fw-bold fs-3 text-danger">@(Model.Trip?.FromStation?.Name ?? "غير محدد")</div>
+                             <div class="fs-4">@(Model.Trip?.DepartureTime.ToString("HH:mm") ?? "--:--")</div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Price, Seat, Train -->
+                    <div class="row">
+                        <div class="col-4 text-center">
+                             <div class="text-muted small mb-1" style="font-size: 0.8rem;">السعر / ecirP</div>
+                             <div class="fw-bold fs-5">DK @Model.Price.ToString("F3")</div>
+                        </div>
+                        <div class="col-4 text-center">
+                             <div class="text-muted small mb-1" style="font-size: 0.8rem;">المقعد / taeS</div>
+                             <div class="fw-bold fs-5">@Model.SeatNumber</div>
+                        </div>
+                         <div class="col-4 text-center">
+                             <div class="text-muted small mb-1" style="font-size: 0.8rem;">القطار / niarT</div>
+                             <div class="fw-bold fs-5">@(Model.Trip?.Train?.TrainNumber ?? "N/A")</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- QR Code Column -->
+                <div class="col-4 text-center d-flex flex-column justify-content-center align-items-center ps-4" style="border-left: 1px dashed #ccc;">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=@Model.Id" alt="QR Code" class="img-fluid mb-2" style="max-width: 160px;">
+                    <div class="fw-bold small mt-2">ID: @Model.Id.ToString().Substring(0, 8).ToUpper()</div>
+                    <div class="text-muted x-small" style="font-size: 0.7rem;">Scan to verify</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="ticket-footer text-center py-3 bg-light" style="font-size: 0.8rem; color: #999;">
+            pirt efas a evaH - نتمنى لكم رحلة آمنة وسعيدة
+        </div>
+        
+        <!-- Bottom Green Bar -->
+        <div style="height: 10px; background-color: #2ecc71; width: 100%;"></div>
+
     </div>
 </body>
 </html>
