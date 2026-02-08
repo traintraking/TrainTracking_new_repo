@@ -21,7 +21,11 @@ namespace TrainTracking.Application.Services
             var allStations = await _stationRepository.GetAllAsync();
             bool isForward = trip.FromStation!.Order < trip.ToStation!.Order;
 
-            var stations = allStations
+            // Simple logic: Exclude skipped stations
+            var relevantStations = allStations.Where(s => !trip.SkippedStationIds.Contains(s.Id));
+
+            // Filter by range
+            var stations = relevantStations
                 .Where(s => s.Order >= Math.Min(trip.FromStation.Order, trip.ToStation.Order) &&
                             s.Order <= Math.Max(trip.FromStation.Order, trip.ToStation.Order));
 
@@ -39,12 +43,16 @@ namespace TrainTracking.Application.Services
             return totalPathDistance;
         }
 
-        private async Task<double> GetSegmentPathDistanceAsync(Station from, Station to)
+        // Updated signature to accept Trip trip
+        private async Task<double> GetSegmentPathDistanceAsync(Station from, Station to, Trip trip)
         {
             var allStations = await _stationRepository.GetAllAsync();
             bool isForward = from.Order < to.Order;
 
-            var stations = allStations
+            // Simple logic: Exclude skipped stations
+            var relevantStations = allStations.Where(s => !trip.SkippedStationIds.Contains(s.Id));
+
+            var stations = relevantStations
                 .Where(s => s.Order >= Math.Min(from.Order, to.Order) &&
                             s.Order <= Math.Max(from.Order, to.Order));
 
@@ -66,7 +74,7 @@ namespace TrainTracking.Application.Services
         {
             if (trip == null || fromStation == null || toStation == null) return 0;
 
-            double segmentDistance = await GetSegmentPathDistanceAsync(fromStation, toStation);
+            double segmentDistance = await GetSegmentPathDistanceAsync(fromStation, toStation, trip);
             double totalTripDistance = await GetTotalPathDistanceAsync(trip);
 
             if (totalTripDistance <= 0) return trip.Price;
@@ -90,7 +98,7 @@ namespace TrainTracking.Application.Services
 
             if (totalDistance <= 0 || totalDurationMinutes <= 0) return trip.DepartureTime;
 
-            double distanceFromStart = await GetSegmentPathDistanceAsync(trip.FromStation!, fromStation);
+            double distanceFromStart = await GetSegmentPathDistanceAsync(trip.FromStation!, fromStation, trip);
 
             double timeOffsetMinutes = (distanceFromStart / totalDistance) * totalDurationMinutes;
 
@@ -110,7 +118,7 @@ namespace TrainTracking.Application.Services
 
             if (totalDistance <= 0 || totalDurationMinutes <= 0) return trip.ArrivalTime;
 
-            double distanceFromStart = await GetSegmentPathDistanceAsync(trip.FromStation!, toStation);
+            double distanceFromStart = await GetSegmentPathDistanceAsync(trip.FromStation!, toStation, trip);
 
             double timeOffsetMinutes = (distanceFromStart / totalDistance) * totalDurationMinutes;
 

@@ -240,42 +240,6 @@
                     </div>
 
                     <hr class="section-divider">
-                    <!-- Price of the trip -->
-                    <div class="section-title">
-                        <i class="fa-dollar-sign"></i>
-                        <span>سعر الرحلة</span>
-                    </div>
-
-                    <div class="info-box">
-                        <p>
-                            <i class="fas fa-magic"></i>
-                            سيتم حساب سعر الرحلة الأساسي تلقائياً بناءً على المسافة بين المحطات (0.2 KD لكل كم، مع زيادة لكل محطة إضافية إذا لزم).
-                        </p>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="Price" class="form-label fw-bold">سعر الرحلة الأساسي</label>
-                        <div class="input-group">
-                            <span class="input-group-text bg-light text-success fw-bold">KD</span>
-                            <input asp-for="Price"
-                                   class="form-control"
-                                   type="number"
-                                   step="0.001"
-                                   min="0"
-                                   placeholder="0.000"
-                                   id="tripPrice"
-                                   readonly />
-                        </div>
-                        <div class="form-text text-muted">سيتم حساب أسعار VIP والدرجة الأولى بناءً على هذا السعر.</div>
-                        <span asp-validation-for="Price" class="text-danger"></span>
-                        <div id="priceFeedback" class="calc-feedback" style="display: none;">
-                            <i class="fas fa-check-circle"></i>
-                            <span id="priceMessage"></span>
-                        </div>
-                    </div>
-
-                    <hr class="section-divider">
-
                     <!-- Route -->
                     <div class="section-title">
                         <i class="fas fa-route"></i>
@@ -354,6 +318,70 @@
 
                     <hr class="section-divider">
 
+                    <div id="skippedStationsSection">
+                        <div class="section-title">
+                            <i class="fas fa-forward"></i>
+                            <span>المحطات المستبعدة (اختياري)</span>
+                        </div>
+                        <div class="info-box">
+                            <p><i class="fas fa-info-circle"></i> حدد المحطات التي لن يتوقف فيها هذا القطار. سيتم إلغاء الرحلات الفرعية لهذه المحطات.</p>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">اختر المحطات للتخطي:</label>
+                            <div class="row" id="skippedStationsContainer">
+                                @foreach (var station in (List<Station>)ViewBag.Stations)
+                                {
+                                    <div class="col-md-4 mb-2 station-checkbox" data-station-id="@station.Id">
+                                        <div class="form-check p-3 border rounded bg-light">
+                                            <input class="form-check-input" type="checkbox" name="SkippedStationIds" value="@station.Id" id="skip_@station.Id"
+                                                   @(Model?.SkippedStationIds.Contains(station.Id) == true ? "checked" : "")>
+                                            <label class="form-check-label me-2" for="skip_@station.Id">
+                                                @station.Name
+                                            </label>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
+
+                    <!-- Price of the trip -->
+                    <div class="section-title">
+                        <i class="fa-dollar-sign"></i>
+                        <span>سعر الرحلة</span>
+                    </div>
+
+                    <div class="info-box">
+                        <p>
+                            <i class="fas fa-magic"></i>
+                            سيتم حساب سعر الرحلة الأساسي تلقائياً بناءً على المسافة بين المحطات (0.2 KD لكل كم، مع زيادة لكل محطة إضافية إذا لزم).
+                        </p>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Price" class="form-label fw-bold">سعر الرحلة الأساسي</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-success fw-bold">KD</span>
+                            <input asp-for="Price"
+                                   class="form-control"
+                                   type="number"
+                                   step="0.001"
+                                   min="0"
+                                   placeholder="0.000"
+                                   id="tripPrice"
+                                   readonly />
+                        </div>
+                        <div class="form-text text-muted">سيتم حساب أسعار VIP والدرجة الأولى بناءً على هذا السعر.</div>
+                        <span asp-validation-for="Price" class="text-danger"></span>
+                        <div id="priceFeedback" class="calc-feedback" style="display: none;">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="priceMessage"></span>
+                        </div>
+                    </div>
+
+                    <hr class="section-divider">
                     <!-- Optional -->
                     <div class="section-title">
                         <i class="fas fa-cog"></i>
@@ -400,6 +428,42 @@
 
     <script>
         $(document).ready(function() {
+            // Embed stations data for client-side logic
+            const stations = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((List<Station>)ViewBag.Stations));
+
+            function updateSkippedStationsList() {
+                const fromId = $('#fromStation').val();
+                const toId = $('#toStation').val();
+
+                if (!fromId || !toId) return;
+
+                const fromStation = stations.find(s => s.Id === fromId);
+                const toStation = stations.find(s => s.Id === toId);
+
+                if (!fromStation || !toStation) return;
+
+                const minOrder = Math.min(fromStation.Order, toStation.Order);
+                const maxOrder = Math.max(fromStation.Order, toStation.Order);
+
+                // Show only intermediate stations
+                $('.station-checkbox').each(function() {
+                    const sId = $(this).data('station-id');
+                    const station = stations.find(s => s.Id === sId);
+                    
+                    if (station && station.Order > minOrder && station.Order < maxOrder) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                        $(this).find('input[type="checkbox"]').prop('checked', false); // Uncheck hidden ones
+                    }
+                });
+            }
+
+            $('#fromStation, #toStation').change(updateSkippedStationsList);
+
+            // Initial run
+            updateSkippedStationsList();
+
             function calculateArrivalAndPrice() {
                 const fromId = $('#fromStation').val();
                 const toId = $('#toStation').val();
@@ -408,19 +472,25 @@
                 console.log('Calculation Triggered:', { fromId, toId, departure });
 
                 if (fromId && toId && departure && fromId !== toId) {
-                    console.log('Valid inputs, sending AJAX...');
                     $('#arrivalTime, #tripPrice').addClass('calculating');
+
+                    // Collect skipped stations
+                    var skippedIds = [];
+                    $('input[name="SkippedStationIds"]:checked').each(function() {
+                        skippedIds.push($(this).val());
+                    });
 
                     $.ajax({
                         url: '@Url.Action("GetCalculatedArrivalAndPrice", "Admin")',
                         type: 'GET',
+                        traditional: true,
                         data: {
                             fromStationId: fromId,
                             toStationId: toId,
-                            departureTime: departure
+                            departureTime: departure,
+                            skippedStationIds: skippedIds
                         },
                         success: function(data) {
-                            console.log('Calculation Result:', data);
                             $('#arrivalTime, #tripPrice').removeClass('calculating');
 
                             if (data.success) {
@@ -432,7 +502,6 @@
                                 $('#priceMessage').text('تم الحساب تلقائياً - السعر: ' + data.price.toFixed(3) + ' KD');
                                 $('#priceFeedback').fadeIn();
                             } else {
-                                console.warn('Calculation failed on server:', data.message);
                                 alert('خطأ في الحساب: ' + data.message);
                             }
                         },
@@ -445,6 +514,11 @@
             }
 
             $('#fromStation, #toStation, #departureTime').on('change input', function() {
+                calculateArrivalAndPrice();
+            });
+
+            // Trigger calc on skipped station change
+            $(document).on('change', 'input[name="SkippedStationIds"]', function() {
                 calculateArrivalAndPrice();
             });
 

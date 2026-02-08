@@ -23,4 +23,16 @@ public class Trip
     public int? DelayMinutes { get; set; }
     public DateTimeOffset? CancelledAt { get; set; }
     public string? PathPolyline { get; set; }
+
+    // Skipped stations (stored as JSON for SQLite compatibility)
+    public string? SkippedStationIdsJson { get; set; }
+
+    [NotMapped]
+    public List<Guid> SkippedStationIds
+    {
+        get => string.IsNullOrEmpty(SkippedStationIdsJson)
+            ? new List<Guid>()
+            : System.Text.Json.JsonSerializer.Deserialize<List<Guid>>(SkippedStationIdsJson) ?? new List<Guid>();
+        set => SkippedStationIdsJson = System.Text.Json.JsonSerializer.Serialize(value);
+    }
 }

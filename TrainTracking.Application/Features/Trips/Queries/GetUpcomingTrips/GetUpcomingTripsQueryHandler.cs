@@ -41,10 +41,33 @@ public class GetUpcomingTripsQueryHandler : IRequestHandler<GetUpcomingTripsQuer
             var fromStation = request.FromStationId.HasValue ? await _stationRepository.GetByIdAsync(request.FromStationId.Value) : null;
             var toStation = request.ToStationId.HasValue ? await _stationRepository.GetByIdAsync(request.ToStationId.Value) : null;
 
+            // إنشاء قائمة جديدة للنتائج بعد التصفية
+            var filteredDtos = new List<TripDto>();
+
             foreach (var dto in dtos)
             {
                 var trip = trips.Find(t => t.Id == dto.Id);
                 if (trip == null) continue;
+
+                // التحقق: إذا كانت المحطة المطلوبة موجودة في SkippedStationIds، تجاهل هذه الرحلة
+                bool shouldSkip = false;
+
+                if (fromStation != null && trip.SkippedStationIds.Contains(fromStation.Id))
+                {
+                    // المحطة المطلوبة للانطلاق متخطاة - لا تعرض الرحلة
+                    shouldSkip = true;
+                }
+
+                if (toStation != null && trip.SkippedStationIds.Contains(toStation.Id))
+                {
+                    // المحطة المطلوبة للوصول متخطاة - لا تعرض الرحلة
+                    shouldSkip = true;
+                }
+
+                if (shouldSkip)
+                {
+                    continue; // تجاهل هذه الرحلة تماماً
+                }
 
                 // إذا طلب المستخدم محطة بداية معينة
                 if (fromStation != null)
@@ -69,7 +92,11 @@ public class GetUpcomingTripsQueryHandler : IRequestHandler<GetUpcomingTripsQuer
                 {
                     dto.Price = await _virtualSegmentService.CalculatePriceAsync(trip, fromStation, toStation);
                 }
+
+                filteredDtos.Add(dto);
             }
+
+            return filteredDtos;
         }
 
         return dtos;
