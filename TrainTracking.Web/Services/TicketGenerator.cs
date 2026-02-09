@@ -20,7 +20,7 @@ namespace TrainTracking.Web.Services
 
         public byte[] GenerateMultipleTicketsPdf(List<Booking> bookings, string baseUrl, Dictionary<string, string> userNationalIds)
         {
-            string logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo.png");
+            string logoPath = Path.Combine(_webHostEnvironment.WebRootPath, "images", "logo1.png");
             byte[]? logoImage = File.Exists(logoPath) ? File.ReadAllBytes(logoPath) : null;
 
             var document = QuestPDF.Fluent.Document.Create(container =>

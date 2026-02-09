@@ -120,7 +120,7 @@ namespace TrainTracking.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                // Adjust times to Kuwait (+3) using DateTimeService
+                // Adjust times using DateTimeService
                 trip.DepartureTime = new DateTimeOffset(trip.DepartureTime.DateTime, _dateTimeService.Now.Offset);
                 trip.ArrivalTime = new DateTimeOffset(trip.ArrivalTime.DateTime, _dateTimeService.Now.Offset);
 
@@ -158,11 +158,11 @@ namespace TrainTracking.Web.Controllers
         {
             try
             {
-                // حساب الوقت (زي الحالي)
+                // Calculate arrival time
                 var departureOffset = new DateTimeOffset(departureTime, _dateTimeService.Now.Offset);
                 var arrivalTime = await _tripService.CalculateArrivalTimeAsync(fromStationId, toStationId, departureOffset);
 
-                // حساب السعر الجديد
+                // Calculate price
                 var fromStation = await _stationRepository.GetByIdAsync(fromStationId);
                 var toStation = await _stationRepository.GetByIdAsync(toStationId);
                 if (fromStation == null || toStation == null)
@@ -170,17 +170,14 @@ namespace TrainTracking.Web.Controllers
                     return Json(new { success = false, message = "محطة غير موجودة" });
                 }
 
-                // حساب المسافة بين from و to (استخدم Haversine زي في StationsController)
+                // Calculate distance
                 var distanceKm = CalculateDistance(fromStation.Latitude, fromStation.Longitude, toStation.Latitude, toStation.Longitude);
 
-                // السعر الأساسي: مسافة * rate (مثل 0.5 KD/km) - عدل الـ rate حسب احتياجك
-                const decimal ratePerKm = 0.2m;  // مثال: 0.5 KD لكل كم
+                // Calculate price Egyptian Pounds
+                const decimal ratePerKm = 0.5m;  // Example: 0.5 KD per km
                 decimal calculatedPrice = (decimal)distanceKm * ratePerKm;
 
-                // لو في محطات وسيطة (افترض مفيش دلوقتي، بس لو عايز تضيف: اجمع مسافات بين كل محطة)
-                // مثال: calculatedPrice += numIntermediateStations * additionalPerStation;
-
-                // rounding لـ 3 منازل عشرية
+                // Round to 3 decimal places
                 calculatedPrice = Math.Round(calculatedPrice, 3);
 
                 return Json(new
@@ -196,7 +193,7 @@ namespace TrainTracking.Web.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
-        // أضف الـ CalculateDistance (انسخه من StationsController لو مش موجود هنا)
+        
         private double CalculateDistance(double lat1, double lon1, double lat2, double lon2)
         {
             var R = 6371; // Radius of the earth in km
@@ -232,27 +229,27 @@ namespace TrainTracking.Web.Controllers
 
 
         [HttpPost]
-        [ValidateAntiForgeryToken] // إضافة مهمة للحماية من الهجمات
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditTrip(Trip trip)
         {
-            // 1. التحقق من صحة البيانات (بما فيها السعر، التاريخ، إلخ)
+            // Make sure about
             if (ModelState.IsValid)
             {
-                // معالجة التوقيت (كما كان في كودك الأصلي)
+                // Make sure about the times
                 trip.DepartureTime = new DateTimeOffset(trip.DepartureTime.DateTime, _dateTimeService.Now.Offset);
                 trip.ArrivalTime = new DateTimeOffset(trip.ArrivalTime.DateTime, _dateTimeService.Now.Offset);
 
-                // منطق الإلغاء
+                // Handle cancellation logic
                 if (trip.Status == TripStatus.Cancelled && trip.CancelledAt == null)
                 {
                     trip.CancelledAt = _dateTimeService.Now;
                 }
 
-                // 2. التحديث في قاعدة البيانات
-                // بما أن كائن trip يحتوي الآن على Price القادم من الفورم، سيتم تحديث السعر أيضاً
+                // Update in the database
+                // Since the trip object now contains the Price coming from the form, the price will also be updated
                 await _tripRepository.UpdateAsync(trip);
 
-                // 3. منطق التنبيهات عند التأخير (كما هو)
+                // Handle delay logic
                 if (trip.Status == TripStatus.Delayed)
                 {
                     var bookings = await _bookingRepository.GetBookingsByTripIdAsync(trip.Id);
@@ -266,10 +263,10 @@ namespace TrainTracking.Web.Controllers
 
                         var delayMsg = $"تنبيه: رحلتك {trip.Id.ToString().Substring(0, 5)} متأخرة {trip.DelayMinutes} دقيقة. نعتذر عن الإزعاج. 🏛️🚅";
 
-                        // إرسال الرسالة
+                        // Send the message
                         var smsResult = await _smsService.SendSmsAsync(phoneNumber, delayMsg);
 
-                        // حفظ في السجل
+                        // Save to the log
                         await _notificationRepository.CreateAsync(new Notification
                         {
                             Recipient = phoneNumber,
@@ -283,15 +280,15 @@ namespace TrainTracking.Web.Controllers
                     }
                 }
 
-                return RedirectToAction(nameof(Trips)); // العودة لصفحة الرحلات
+                return RedirectToAction(nameof(Trips)); // Redirect to Trips action
             }
 
-            // 4. في حالة وجود خطأ (مثل إدخال سعر بالسالب)، نعيد تعبئة القوائم
+            // In case of error (like entering a negative price), we reload the dropdowns
             ViewBag.Trains = await _trainRepository.GetAllAsync();
             ViewBag.Stations = await _stationRepository.GetAllAsync();
 
-            // انتبه: تأكد أن اسم الفيو هنا هو اسم صفحة التعديل
-            // إذا كانت الصفحة اسمها EditTrip.cshtml استخدم هذا:
+            // Note: Make sure the view name here is the name of the edit page
+            // If the page name is EditTrip.cshtml use this:
             return View("EditTrip", trip);
         }
         [HttpPost]
