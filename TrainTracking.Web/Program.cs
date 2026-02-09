@@ -64,15 +64,14 @@ try
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; 
     });
 
-    // Configure SQLite (Standard Context - Pooling can cause issues with Migrations/SQLite)
-    var dbPath = "new.db"; // اسم جديد للقاعدة
+    // Configure SQL Server (Instead of SQLite for better production support)
     builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
-        options.UseSqlite($"Data Source={dbPath}"));
-    //local db
-    //builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
-    //options.UseSqlServer(
-    //    builder.Configuration.GetConnectionString("DefaultConnection")
-    //));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+    // SQLite (Disabled)
+    // var dbPath = "new.db";
+    // builder.Services.AddDbContext<TrainTrackingDbContext>(options =>
+    //    options.UseSqlite($"Data Source={dbPath}"));
 
     builder.Services.AddTransient<IEmailSender, EmailSender>();
 

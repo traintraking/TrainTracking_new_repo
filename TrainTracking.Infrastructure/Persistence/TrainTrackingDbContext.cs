@@ -52,7 +52,18 @@ namespace TrainTracking.Infrastructure.Persistence
             {
                 entity.HasOne(b => b.Trip)
                       .WithMany()
-                      .HasForeignKey(b => b.TripId);
+                      .HasForeignKey(b => b.TripId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(b => b.FromStation)
+                      .WithMany()
+                      .HasForeignKey(b => b.FromStationId)
+                      .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(b => b.ToStation)
+                      .WithMany()
+                      .HasForeignKey(b => b.ToStationId)
+                      .OnDelete(DeleteBehavior.Restrict);
 
                 entity.Property(b => b.Price)
                       .HasColumnType("decimal(10,2)");
