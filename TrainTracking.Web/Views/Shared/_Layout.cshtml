@@ -46,6 +46,12 @@
             transition: all 0.3s ease;
             position: relative;
         }
+
+        .navbar-logo {
+            height: 70px;
+            width: auto;
+        }
+
         .nav-link:hover { 
             color: #005eb8 !important; 
             background-color: rgba(0, 94, 184, 0.08); 
@@ -59,12 +65,11 @@
         <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom box-shadow mb-3 navbar-custom">
             <div class="container">
                 <!-- Brand -->
-                <a class="navbar-brand d-flex align-items-center" asp-area="" asp-controller="Home" asp-action="Index">
-                    <div class="logo-wrapper">
-                        <i class="fas fa-train logo-icon"></i>
-                        <span class="logo-text ms-1">Sikka<span class="text-primary-go"></span></span>
-                    </div>
+                <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo1.png" alt="Sikka Logo" class="navbar-logo" />
                 </a>
+
+
 
                 <!-- Desktop Navigation (Center) -->
                 <div class="collapse navbar-collapse d-none d-lg-flex justify-content-center">
@@ -253,7 +258,7 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="logo-wrapper mb-4">
                         <i class="fas fa-train logo-icon"></i>
-                        <span class="logo-text ms-1">Kuw<span class="text-primary-go">Go</span></span>
+                        <span class="logo-text ms-1">Sik<span class="text-primary-go">ka</span></span>
                     </div>
                     <p class="text-muted mb-4 pe-lg-4">
                         @Localizer["FooterTagline"]
