@@ -62,10 +62,10 @@ namespace TrainTracking.Web.Services
                                     }
                                     
                                     // 2. Center Text "OFFICIAL E-TICKET"
-                                    row.RelativeItem().AlignMiddle().AlignCenter().Text("OFFICIAL E-TICKET").FontSize(12).Medium().FontColor(Colors.White);
+                                    row.RelativeItem().AlignMiddle().AlignCenter().Text("O    F    F    I    C    I    A    L     E    -    T    I    C    K    E    T").FontSize(12).Medium().FontColor(Colors.White);
 
                                     // 3. Brand Name (Right) "KuwGo"
-                                    row.ConstantItem(100).AlignMiddle().AlignRight().Text("KuwGo").FontSize(24).Bold().FontColor(Colors.White);
+                                    row.ConstantItem(100).AlignMiddle().AlignRight().Text("Sikka").FontSize(24).Bold().FontColor(Colors.White);
                                 });
 
                                 // --- Main Body ---
@@ -149,7 +149,7 @@ namespace TrainTracking.Web.Services
                                                     t.Span("Price / ").FontSize(8).FontColor(Colors.Grey.Medium);
                                                     t.Span("السعر").FontSize(8).FontColor(Colors.Grey.Medium);
                                                 });
-                                                c.Item().AlignCenter().Text($"DK {booking.Price:F3}").FontSize(12).Bold();
+                                                c.Item().AlignCenter().Text($"EGP {booking.Price:F3}").FontSize(12).Bold();
                                             });
                                             // Seat
                                             r.RelativeItem().Column(c =>
