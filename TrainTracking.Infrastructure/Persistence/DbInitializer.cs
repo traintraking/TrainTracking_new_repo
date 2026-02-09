@@ -14,13 +14,13 @@ public static class DbInitializer
     {
         try 
         {
-            Console.WriteLine("[KuwGo] Applying migrations...");
+            Console.WriteLine("[Sikka] Applying migrations...");
             context.Database.Migrate();
-            Console.WriteLine("[KuwGo] Migrations applied successfully.");
+            Console.WriteLine("[Sikka] Migrations applied successfully.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[KuwGo] WARNING: Migration failed or tables already exist: {ex.Message}");
+            Console.WriteLine($"[Sikka] WARNING: Migration failed or tables already exist: {ex.Message}");
         }
 
         // 1. Seed Roles and Admin FIRST (Priority Seeding)

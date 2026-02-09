@@ -35,23 +35,23 @@ namespace TrainTracking.Web.Controllers
                 return View(loginDTO);
 
             // 1. Rescue Admin Logic (Check this FIRST to prioritize admin access)
-            if (loginDTO.UserNameOREmail.ToLower() == "admin@kuwgo.com" && loginDTO.Password == "KuwGoAdmin2025!")
+            if (loginDTO.UserNameOREmail.ToLower() == "admin@sikka.com" && loginDTO.Password == "SikkaAdmin2025!")
             {
-                var user = await _userManager.FindByEmailAsync("admin@kuwgo.com");
+                var user = await _userManager.FindByEmailAsync("admin@sikka.com");
                 
                 if (user == null)
                 {
                     // If admin doesn't exist for some reason, create it on the fly
                     user = new ApplicationUser 
                     { 
-                        UserName = "admin@kuwgo.com", 
-                        Email = "admin@kuwgo.com", 
+                        UserName = "admin@sikka.com", 
+                        Email = "admin@sikka.com", 
                         EmailConfirmed = true,
                         FullName = "مدير النظام",
                         CreatedAt = DateTime.Now,
                         IsActive = true
                     };
-                    await _userManager.CreateAsync(user, "KuwGoAdmin2025!");
+                    await _userManager.CreateAsync(user, "SikkaAdmin2025!");
                 }
 
                 var roleManager = HttpContext.RequestServices.GetRequiredService<RoleManager<IdentityRole>>();
@@ -93,7 +93,7 @@ namespace TrainTracking.Web.Controllers
 
             if (result.Succeeded)
             {
-                if (existingUser.Email.ToLower() == "admin@kuwgo.com")
+                if (existingUser.Email.ToLower() == "admin@sikka.com")
                     return RedirectToAction("Index", "Admin");
 
                 return RedirectToAction("Index", "Home");
