@@ -152,27 +152,27 @@ try
             // Revert to async call but wait to ensure completion for the first user
             await DbInitializer.Seed(context, userManager, roleManager);
             
-            Console.WriteLine("[KuwGo] Database initialization completed.");
+            Console.WriteLine("[Sikka] Database initialization completed.");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[KuwGo] ERROR during database initialization: {ex.Message}");
-            if (ex.InnerException != null) Console.WriteLine($"[KuwGo] INNER: {ex.InnerException.Message}");
+            Console.WriteLine($"[Sikka] ERROR during database initialization: {ex.Message}");
+            if (ex.InnerException != null) Console.WriteLine($"[Sikka] INNER: {ex.InnerException.Message}");
         }
     }
 
-    Console.WriteLine("[KuwGo] STARTING SERVER...");
+    Console.WriteLine("[Sikka] STARTING SERVER...");
     app.Run();
 }
 catch (Exception ex)
 {
     Console.WriteLine("=================================================");
-    Console.WriteLine("[KuwGo] FATAL CRASH DURING STARTUP");
-    Console.WriteLine($"[KuwGo] ERROR: {ex.Message}");
-    Console.WriteLine($"[KuwGo] STACK TRACE: {ex.StackTrace}");
+    Console.WriteLine("[Sikka] FATAL CRASH DURING STARTUP");
+    Console.WriteLine($"[Sikka] ERROR: {ex.Message}");
+    Console.WriteLine($"[Sikka] STACK TRACE: {ex.StackTrace}");
     if (ex.InnerException != null)
     {
-        Console.WriteLine($"[KuwGo] INNER ERROR: {ex.InnerException.Message}");
+        Console.WriteLine($"[Sikka] INNER ERROR: {ex.InnerException.Message}");
     }
     Console.WriteLine("=================================================");
     throw;

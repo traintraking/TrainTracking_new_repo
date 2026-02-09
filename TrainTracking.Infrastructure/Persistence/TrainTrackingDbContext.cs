@@ -69,37 +69,7 @@ namespace TrainTracking.Infrastructure.Persistence
                       .HasColumnType("decimal(10,2)");
             });
 
-            // SQLite DateTimeOffset fix: convert to string to preserve offset
-            var dateTimeOffsetConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTimeOffset, string>(
-                v => v.ToString("O"),
-                v => v.Contains("-") ? DateTimeOffset.Parse(v) : new DateTimeOffset(long.Parse(v), TimeSpan.Zero));
 
-            var nullableDateTimeOffsetConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTimeOffset?, string?>(
-                v => v.HasValue ? v.Value.ToString("O") : (string?)null,
-                v => string.IsNullOrEmpty(v) ? (DateTimeOffset?)null : 
-                     (v.Contains("-") ? DateTimeOffset.Parse(v) : new DateTimeOffset(long.Parse(v), TimeSpan.Zero)));
-
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
-            {
-                var properties = entityType.ClrType.GetProperties()
-                    .Where(p => p.PropertyType == typeof(DateTimeOffset) || p.PropertyType == typeof(DateTimeOffset?));
-
-                foreach (var property in properties)
-                {
-                    if (property.PropertyType == typeof(DateTimeOffset))
-                    {
-                        modelBuilder.Entity(entityType.Name)
-                            .Property(property.Name)
-                            .HasConversion(dateTimeOffsetConverter);
-                    }
-                    else
-                    {
-                        modelBuilder.Entity(entityType.Name)
-                            .Property(property.Name)
-                            .HasConversion(nullableDateTimeOffsetConverter);
-                    }
-                }
-            }
 
         }
     }

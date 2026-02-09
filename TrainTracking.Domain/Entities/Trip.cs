@@ -12,8 +12,8 @@ public class Trip
     public Station? FromStation { get; set; }
     public Guid ToStationId { get; set; }
 
-    [Display(Name = "سعر الرحلة (KD)")]
-    [Column(TypeName = "decimal(18, 3)")] // 3 خانات عشرية للدينار
+    [Display(Name = "سعر الرحلة")]
+    [Column(TypeName = "decimal(18, 3)")] 
     public decimal Price { get; set; }
 
     public Station? ToStation { get; set; }
