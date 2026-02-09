@@ -9,7 +9,7 @@ namespace TrainTracking.Application.Interfaces
         Task<ApplicationUser?> GetUserByIdAsync(string id);
         Task<ApplicationUser?> GetUserByEmailAsync(string email);
         Task<ApplicationUser> UpdateUserAsync(ApplicationUser user);
-        Task<string?> SaveProfilePictureAsync(IFormFile file, string userId);
+        Task<string?> SaveProfilePictureAsync(IFormFile file, string userId, string? oldFilePath);
         Task<int> GetTotalUsersCountAsync();
     }
 }

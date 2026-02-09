@@ -83,12 +83,14 @@ namespace TrainTracking.Web.Controllers
                     user.Country = model.Country;
                     user.DateOfBirth = model.DateOfBirth;
 
+
                     // حفظ الصورة لو تم رفعها
                     if (profilePicture != null && profilePicture.Length > 0)
                     {
-                        var picturePath = await _userService.SaveProfilePictureAsync(profilePicture, model.Id);
+                        var picturePath = await _userService.SaveProfilePictureAsync(profilePicture, model.Id, user.ProfilePicturePath);
                         user.ProfilePicturePath = picturePath;
                     }
+
 
                     await _userService.UpdateUserAsync(user);
 
