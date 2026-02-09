@@ -15,12 +15,12 @@ using TrainTracking.Domain.Entities;
 
 try
 {
-    Console.WriteLine("[KuwGo] Global Start sequence initiated...");
+    Console.WriteLine("[Sikka] Global Start sequence initiated...");
     
     // QuestPDF License - This triggers native lib loading (SkiaSharp)
-    Console.WriteLine("[KuwGo] Setting QuestPDF License (Community)...");
+    Console.WriteLine("[Sikka] Setting QuestPDF License (Community)...");
     QuestPDF.Settings.License = LicenseType.Community;
-    Console.WriteLine("[KuwGo] QuestPDF License set successfully.");
+    Console.WriteLine("[Sikka] QuestPDF License set successfully.");
 
     var builder = WebApplication.CreateBuilder(args);
 
@@ -32,11 +32,11 @@ try
     if (!builder.Environment.IsDevelopment())
     {
         var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-        Console.WriteLine($"[KuwGo] Binding to http://0.0.0.0:{port}");
+        Console.WriteLine($"[Sikka] Binding to http://0.0.0.0:{port}");
         builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
     }
 
-    Console.WriteLine($"[KuwGo] Environment: {builder.Environment.EnvironmentName}");
+    Console.WriteLine($"[Sikka] Environment: {builder.Environment.EnvironmentName}");
 
     // Identity Configuration
     // Identity Configuration
@@ -139,7 +139,7 @@ try
     app.MapHub<TripHub>("/tripHub");
 
     // Initialize Database and Seed Essential Data (NON-BLOCKING or explicitly caught)
-    Console.WriteLine("[KuwGo] Initializing database and essential data...");
+    Console.WriteLine("[Sikka] Initializing database and essential data...");
     using (var scope = app.Services.CreateScope())
     {
         var services = scope.ServiceProvider;
