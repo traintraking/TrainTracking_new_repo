@@ -36,7 +36,7 @@ namespace TrainTracking.Application.Services
             return await _userRepository.GetCountAsync();
         }
 
-        public async Task<string?> SaveProfilePictureAsync(IFormFile file, string userId)
+        public async Task<string?> SaveProfilePictureAsync(IFormFile file, string userId, string? oldFilePath = null)
         {
             if (file == null || file.Length == 0)
                 return null;
@@ -45,6 +45,16 @@ namespace TrainTracking.Application.Services
 
             if (!Directory.Exists(uploadsFolder))
                 Directory.CreateDirectory(uploadsFolder);
+
+            // „”Õ «·’Ê—… «·ﬁœÌ„… ·Ê „ÊÃÊœ…
+            if (!string.IsNullOrEmpty(oldFilePath))
+            {
+                var oldFileFullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", oldFilePath.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString()));
+                if (File.Exists(oldFileFullPath))
+                {
+                    File.Delete(oldFileFullPath);
+                }
+            }
 
             var uniqueFileName = $"{userId}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
             var filePath = Path.Combine(uploadsFolder, uniqueFileName);
@@ -56,5 +66,6 @@ namespace TrainTracking.Application.Services
 
             return $"/uploads/profiles/{uniqueFileName}";
         }
+
     }
 }
