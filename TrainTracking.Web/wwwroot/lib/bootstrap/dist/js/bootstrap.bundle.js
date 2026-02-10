@@ -4941,7 +4941,7 @@
     scroll: 'boolean'
   };
   const CLASS_NAME_SHOW$3 = 'show';
-  const CLASS_NAME_BACKDROP = 'offcanvas-backdrop';
+  const CLASS_NAME_BACEGPROP = 'offcanvas-backdrop';
   const OPEN_SELECTOR = '.offcanvas.show';
   const EVENT_SHOW$2 = `show${EVENT_KEY$5}`;
   const EVENT_SHOWN$2 = `shown${EVENT_KEY$5}`;
@@ -5084,7 +5084,7 @@
 
     _initializeBackDrop() {
       return new Backdrop({
-        className: CLASS_NAME_BACKDROP,
+        className: CLASS_NAME_BACEGPROP,
         isVisible: this._config.backdrop,
         isAnimated: true,
         rootElement: this._element.parentNode,

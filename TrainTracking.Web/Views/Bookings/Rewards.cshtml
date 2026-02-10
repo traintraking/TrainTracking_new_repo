@@ -54,7 +54,7 @@
             <!-- Redemption Box -->
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
                 <h5 class="fw-bold mb-3">تحويل النقاط لتذاكر</h5>
-                <p class="small text-muted mb-4">كل 200 نقطة تمنحك تذكرة مجانية واحدة لأي وجهة في الكويت (بقيمة 2 د.ك).</p>
+                <p class="small text-muted mb-4">كل 200 نقطه تمنحك خصم 50% بحد اقصي (50 EGP) للرحله الي تحتارها انت .</p>
                 
                 <div class="d-flex align-items-center mb-4">
                     <div class="flex-grow-1">
@@ -109,10 +109,10 @@
                                             <div class="small text-muted">@booking.BookingDate.ToString("dd MMM yyyy")</div>
                                         </td>
                                         <td class="px-3 py-3">
-                                            <span class="badge bg-soft-primary text-primary px-3">@booking.Price.ToString("F3") د.ك</span>
+                                            <span class="badge bg-soft-primary text-primary px-3">@booking.Price.ToString("F3") EGP</span>
                                         </td>
                                         <td class="px-3 py-3 text-end">
-                                            <div class="fw-bold text-success">+@((int)(booking.Price * 10)) <i class="fas fa-plus-circle ms-1 small"></i></div>
+                                            <div class="fw-bold text-success">+@((int)(booking.Price * 0.8m)) <i class="fas fa-plus-circle ms-1 small"></i></div>
                                         </td>
                                     </tr>
                                 }

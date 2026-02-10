@@ -47,12 +47,12 @@
                                     <i class="fas fa-chair me-1"></i> مقعد <span class="text-dark fw-bold">@booking.SeatNumber</span>
                                 </small>
                                 <small class="text-muted">
-                                    <i class="fas fa-money-bill-wave me-1"></i> <span class="text-dark fw-bold">@booking.Price د.ك</span>
+                                    <i class="fas fa-money-bill-wave me-1"></i> <span class="text-dark fw-bold">@booking.Price EGP</span>
                                 </small>
                                 @if (booking.Status == BookingStatus.Confirmed)
                                 {
                                     <small class="text-warning fw-bold ms-2">
-                                        <i class="fas fa-coins me-1"></i> +@((int)(booking.Price * 10)) نقطة
+                                        <i class="fas fa-coins me-1"></i> +@((int)(booking.Price * 0.8m)) نقطة
                                     </small>
                                 }
                             </div>
@@ -66,7 +66,7 @@
                                 <small class="text-muted d-block mb-1">من</small>
                                 <div class="fw-bold text-primary">@(booking.Trip?.FromStation?.Name ?? "غير محدد")</div>
                                 <small class="text-muted">
-                                    <i class="far fa-clock me-1"></i> @(booking.Trip?.DepartureTime.ToString("HH:mm") ?? "--:--")
+                                    <i class="far fa-clock me-1"></i> @(booking.Trip?.DepartureTime.ToString("hh:mm tt") ?? "--:--")
                                 </small>
                             </div>
                         </div>
@@ -78,7 +78,7 @@
                                 <small class="text-muted d-block mb-1">إلى</small>
                                 <div class="fw-bold text-primary">@(booking.Trip?.ToStation?.Name ?? "غير محدد")</div>
                                 <small class="text-muted">
-                                    <i class="far fa-clock me-1"></i> @(booking.Trip?.ArrivalTime.ToString("HH:mm") ?? "--:--")
+                                    <i class="far fa-clock me-1"></i> @(booking.Trip?.ArrivalTime.ToString("hh:mm tt") ?? "--:--")
                                 </small>
                             </div>
                         </div>
@@ -88,7 +88,7 @@
                     <div class="d-grid gap-2">
                         @if (booking.Status == BookingStatus.Confirmed)
                         {
-                            <a asp-action="DownloadTicket" asp-route-id="@booking.Id" class="btn btn-outline-primary rounded-pill fw-bold">
+                            <a asp-action="DownloadTickets" asp-route-ids="@booking.Id" class="btn btn-outline-primary rounded-pill fw-bold">
                                 <i class="fas fa-download me-2"></i> تحميل التذكرة
                             </a>
                             @if (booking.Trip != null && booking.Trip.DepartureTime > DateTimeOffset.Now)
@@ -100,7 +100,7 @@
                         }
                         else if (booking.Status == BookingStatus.PendingPayment)
                         {
-                            <a asp-action="Payment" asp-route-id="@booking.Id" class="btn btn-primary rounded-pill fw-bold shadow-sm warning-pulse">
+                            <a asp-action="Payment" asp-route-ids="@booking.Id" class="btn btn-primary rounded-pill fw-bold shadow-sm warning-pulse">
                                 <i class="fas fa-credit-card me-2"></i> إتمام الدفع
                             </a>
                             <form asp-action="DeleteBooking" method="post" class="d-inline" onsubmit="return confirm('هل أنت متأكد من إلغاء هذا الحجز؟');">

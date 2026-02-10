@@ -34,15 +34,15 @@
                         <hr>
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">سعر التذكرة الأصلي:</span>
-                            <span class="fw-bold">@Model.Price د.ك</span>
+                            <span class="fw-bold">@Model.Price EGP</span>
                         </div>
                         <div class="d-flex justify-content-between mb-2 text-danger">
                             <span>نسبة الخصم (@(deductionPercentage)%):</span>
-                            <span class="fw-bold">- @(Model.Price * (deductionPercentage / 100)) د.ك</span>
+                            <span class="fw-bold">- @(Model.Price * (deductionPercentage / 100)) EGP</span>
                         </div>
                         <div class="d-flex justify-content-between mt-3 pt-3 border-top">
                             <span class="h5 fw-bold mb-0">المبلغ المسترد:</span>
-                            <span class="h5 fw-bold text-success mb-0">@refundAmount د.ك</span>
+                            <span class="h5 fw-bold text-success mb-0">@refundAmount EGP</span>
                         </div>
                     </div>
 

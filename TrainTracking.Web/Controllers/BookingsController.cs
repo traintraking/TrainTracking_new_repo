@@ -42,15 +42,15 @@ namespace TrainTracking.Web.Controllers
         }
         private decimal CalculateSeatPrice(int seatNumber, decimal basePrice)
         {
-            // العربة رقم 1 (المقاعد من 1 إلى 20) -> VIP
+            // Carriage 1 (Seats 1 to 20) -> VIP
             if (seatNumber >= 1 && seatNumber <= 20)
                 return basePrice * 2;
 
-            // العربة رقم 2 (المقاعد من 21 إلى 40) -> First Class
+            // Carriage 2 (Seats 21 to 40) -> First Class
             if (seatNumber >= 21 && seatNumber <= 40)
                 return basePrice * 1.5m;
 
-            // باقي العربات -> السعر العادي
+            // Other carriages -> Standard price
             return basePrice;
         }
         [HttpGet]
@@ -84,11 +84,11 @@ namespace TrainTracking.Web.Controllers
                 return NotFound("لم يتم العثور على المحطات المطلوبة.");
             }
 
-            // حساب الوقت المحلي للمقطع المختطر
+            // Calculate local time for the selected segment
             DateTimeOffset segmentDepartureTime = await _virtualSegmentService.CalculateDepartureTimeAsync(trip, fromStation);
             DateTimeOffset segmentArrivalTime = await _virtualSegmentService.CalculateArrivalTimeAsync(trip, toStation);
 
-            // حساب السعر والمقاعد المحجوزة للمقطع
+            // Calculate price and reserved seats for the segment
             decimal segmentPrice = await _virtualSegmentService.CalculatePriceAsync(trip, fromStation, toStation);
             ViewBag.totalSeats = trip.Train?.TotalSeats ?? 0;
             ViewBag.TakenSeats = await _bookingRepository.GetTakenSeatsAsync(targetId.Value, effectiveFromId, effectiveToId);
@@ -97,7 +97,7 @@ namespace TrainTracking.Web.Controllers
             ViewBag.SegmentDepartureTime = segmentDepartureTime;
             ViewBag.SegmentArrivalTime = segmentArrivalTime;
 
-            // جلب بيانات المستخدم الحالي
+            // Fetch current user data
             var userId = _userManager.GetUserId(User);
             var user = await _userManager.FindByIdAsync(userId);
             bool hasPhone = !string.IsNullOrEmpty(user?.PhoneNumber);
@@ -112,7 +112,7 @@ namespace TrainTracking.Web.Controllers
                 FromStationId = effectiveFromId,
                 ToStationId = effectiveToId,
                 Price = segmentPrice,
-                // نملأ البيانات تلقائياً من البروفايل
+                // Automatically fill data from profile
                 PassengerName = user?.FullName ?? "",
                 PassengerPhone = hasPhone ? user!.PhoneNumber! : ""
             };
@@ -133,7 +133,7 @@ namespace TrainTracking.Web.Controllers
             ModelState.Remove("FromStation");
             ModelState.Remove("ToStation");
 
-            // التعامل مع رقم الهاتف المخفي
+            // Handle hidden phone number
             var userId = _userManager.GetUserId(User);
             var user = await _userManager.FindByIdAsync(userId);
             if (string.IsNullOrEmpty(booking.PassengerPhone) && !string.IsNullOrEmpty(user?.PhoneNumber))
@@ -230,7 +230,7 @@ namespace TrainTracking.Web.Controllers
 
             if (!bookings.Any()) return NotFound("لا توجد حجوزات صالحة للدفع.");
 
-            // نضع الـ ids في ViewBag لكي نمررها للفورم عند الدفع (ProcessPayment)
+            // Pass IDs to ViewBag to be used in the payment form (ProcessPayment)
             ViewBag.BookingIds = ids;
             ViewBag.TotalPrice = bookings.Sum(b => b.Price);
 
@@ -262,7 +262,7 @@ namespace TrainTracking.Web.Controllers
 
             if (!confirmedBookings.Any()) return NotFound("لا توجد حجوزات صالحة للمعالجة.");
 
-            // محاكاة عملية الدفع
+            // Simulate payment process
             await Task.Delay(1500);
 
             if (paymentMethod == "KNET" && string.IsNullOrEmpty(pin))
@@ -271,7 +271,7 @@ namespace TrainTracking.Web.Controllers
                 return View("Payment", confirmedBookings);
             }
 
-            // تحديث الحالة وحفظ التعديلات
+            // Update status and save changes
             foreach (var booking in confirmedBookings)
             {
                 booking.Status = BookingStatus.Confirmed;
@@ -280,9 +280,9 @@ namespace TrainTracking.Web.Controllers
 
 
 
-            // تجهيز بيانات الإشعارات
+            // Prepare notification data
             var firstBooking = confirmedBookings.First();
-            // ✅ بعد تأكيد الحجوزات نشوف هل الكراسي خلصت؟
+            // Check if seats are fully booked after confirmation
             var trip = await _tripRepository.GetByIdAsync(firstBooking.TripId);
 
             if (trip == null || trip.Train == null)
@@ -290,11 +290,11 @@ namespace TrainTracking.Web.Controllers
                 return NotFound("بيانات الرحلة أو القطار غير متوفرة.");
             }
 
-            // عدد الكراسي المحجوزة فعلياً
+            // Actual booked seats count
             var bookedSeatsCount = await _bookingRepository
                 .GetConfirmedSeatsCountAsync(trip.Id);
 
-            // لو عدد المحجوز == إجمالي الكراسي
+            // If booked seats equal total seats
             if (bookedSeatsCount >= trip.Train.TotalSeats)
             {
                 trip.Status = TripStatus.Completed;
@@ -308,18 +308,18 @@ namespace TrainTracking.Web.Controllers
             var seatNumbers = string.Join(", ", confirmedBookings.Select(b => b.SeatNumber));
             var totalPrice = confirmedBookings.Sum(b => b.Price);
 
-            // إرسال البريد
+            // Send Email
             await _emailService.SendEmailAsync(User.Identity.Name, "تأكيد حجز مقاعد القطار",
-                $"تم تأكيد حجزك للمقاعد ({seatNumbers}) بنجاح. الإجمالي المدفوع: {totalPrice} KD.");
+                $"تم تأكيد حجزك للمقاعد ({seatNumbers}) بنجاح. الإجمالي المدفوع: {totalPrice} EGP.");
 
-            // إرسال SMS
+            // Send SMS
             var phoneNumber = firstBooking.PassengerPhone;
-            if (!phoneNumber.StartsWith("+") && phoneNumber.Length == 8) phoneNumber = "+965" + phoneNumber;
+            if (!phoneNumber.StartsWith("+") && phoneNumber.Length == 8) phoneNumber = "+2" + phoneNumber;
 
-            var smsMessage = $"✅ تم دفع {totalPrice} KD بنجاح! مقاعدك: ({seatNumbers}) مؤكدة الآن. رحلة سعيدة! 🚂💳";
+            var smsMessage = $"✅ تم دفع {totalPrice} EGP بنجاح! مقاعدك: ({seatNumbers}) مؤكدة الآن. رحلة سعيدة! 🚂💳";
             var smsResult = await _smsService.SendSmsAsync(phoneNumber, smsMessage);
 
-            // حفظ سجل الإشعار
+            // Save Notification log
             await _notificationRepository.CreateAsync(new Notification
             {
                 Recipient = phoneNumber,
@@ -330,7 +330,7 @@ namespace TrainTracking.Web.Controllers
                 IsSent = smsResult.Success
             });
 
-            // التوجيه لصفحة النجاح مع كامل الـ IDs
+            // Redirect to success page with all IDs
             return RedirectToAction(nameof(Success), new { ids = ids });
         }
         /// <summary>
@@ -345,10 +345,10 @@ namespace TrainTracking.Web.Controllers
 
             var bookings = await _bookingRepository.GetBookingsByUserIdAsync(userId);
             
-            // Real Points = (Confirmed Bookings * 10) - Redeemed Points
+            // Real Points = (Confirmed Bookings * 0.8) - Redeemed Points
             var earnedPoints = (int)bookings
                 .Where(b => b.Status == BookingStatus.Confirmed)
-                .Sum(b => b.Price * 10);
+                .Sum(b => b.Price * 0.8m);
             
             var redeemedPoints = await _bookingRepository.GetRedeemedPointsAsync(userId);
             ViewBag.TotalPoints = earnedPoints - redeemedPoints;
@@ -365,7 +365,7 @@ namespace TrainTracking.Web.Controllers
             var bookings = await _bookingRepository.GetBookingsByUserIdAsync(userId);
             var confirmedBookings = bookings.Where(b => b.Status == BookingStatus.Confirmed).ToList();
             
-            var earnedPoints = (int)confirmedBookings.Sum(b => b.Price * 10);
+            var earnedPoints = (int)confirmedBookings.Sum(b => b.Price * 0.8m);
             var redeemedPoints = await _bookingRepository.GetRedeemedPointsAsync(userId);
             
             ViewBag.TotalPoints = earnedPoints - redeemedPoints;
@@ -384,7 +384,7 @@ namespace TrainTracking.Web.Controllers
             var bookings = await _bookingRepository.GetBookingsByUserIdAsync(userId);
             var earnedPoints = (int)bookings
                 .Where(b => b.Status == BookingStatus.Confirmed)
-                .Sum(b => b.Price * 10);
+                .Sum(b => b.Price * 0.8m);
             
             var redeemedPointsBefore = await _bookingRepository.GetRedeemedPointsAsync(userId);
             var currentPoints = earnedPoints - redeemedPointsBefore;
@@ -413,26 +413,32 @@ namespace TrainTracking.Web.Controllers
         }
         /////////////////////////////////////////////////////////////////////////////////////////////////////////
         [HttpGet]
-        public IActionResult Success(string ids) // غيرنا النوع من Guid لـ string ليقبل "id1,id2,id3"
+        public IActionResult Success(string ids) 
         {
             if (string.IsNullOrEmpty(ids))
             {
-                // إذا لم توجد معرفات، ارجع للرئيسية أو صفحة حجوزاتي
+                // If no IDs found, return to dashboard or my bookings
                 return RedirectToAction("MyBookings");
             }
 
-            // تأكد من أن الاسم "BookingIds" بالجمع تماماً كما كتبته في الـ View
+            // Ensure the name "BookingIds" matches exactly what is written in the View
             ViewBag.BookingIds = ids;
 
             return View();
         }
 
-        [HttpGet("Bookings/DownloadTickets")] // تم تغيير الاسم للجمع وتغيير مسار الـ Route
+        [HttpGet("Bookings/DownloadTicket/{id}")]
+        public async Task<IActionResult> DownloadTicket(string id)
+        {
+            return await DownloadTickets(id);
+        }
+
+        [HttpGet("Bookings/DownloadTickets")] 
         public async Task<IActionResult> DownloadTickets(string ids)
         {
             if (string.IsNullOrEmpty(ids)) return BadRequest("No ticket IDs provided.");
 
-            // 1. تحويل المعرفات من نص إلى قائمة
+            // 1. Convert IDs from string to list
             var bookingIds = ids.Split(',', StringSplitOptions.RemoveEmptyEntries)
                                 .Select(Guid.Parse)
                                 .ToList();
@@ -444,7 +450,7 @@ namespace TrainTracking.Web.Controllers
 
             var nationalIds = new Dictionary<string, string>();
 
-            // 2. جلب الحجوزات والتحقق من الصلاحيات لكل حجز
+            // 2. Fetch bookings and verify permissions for each booking
             foreach (var id in bookingIds)
             {
                 var booking = await _bookingRepository.GetByIdAsync(id);
@@ -471,7 +477,7 @@ namespace TrainTracking.Web.Controllers
 
             if (!bookings.Any()) return Forbid();
 
-            // 3. تجهيز الروابط (QR Codes) لكل تذكرة
+            // 3. Prepare QR Codes for each ticket
             var request = HttpContext.Request;
             var host = request.Host.Value;
             var scheme = request.Scheme;
@@ -492,10 +498,10 @@ namespace TrainTracking.Web.Controllers
 
             var baseUrl = $"{scheme}://{host}";
 
-            // 4. استدعاء المولد لإنشاء ملف PDF واحد يحتوي على كل التذاكر
-            var pdf = _ticketGenerator.GenerateMultipleTicketsPdf(bookings, baseUrl, nationalIds);
+            // 4. Call generator to create a single PDF containing all tickets
+            var pdf = await _ticketGenerator.GenerateMultipleTicketsPdfAsync(bookings, baseUrl, nationalIds);
 
-            // إرجاع الملف باسم معبر
+            // Return file with descriptive name
             string fileName = bookings.Count > 1 ? $"Tickets-Group-{DateTime.Now:yyyyMMdd}.pdf" : $"Ticket-{bookings[0].Id.ToString()[..8]}.pdf";
             return File(pdf, "application/pdf", fileName);
         }
@@ -589,7 +595,7 @@ namespace TrainTracking.Web.Controllers
             decimal deductionPercentage = timeToDeparture.TotalHours <= 24 ? 25 : 10;
             decimal refundAmount = booking.Price * (1 - deductionPercentage / 100);
 
-            var cancelMsg = $"تم إلغاء حجزك رقم {booking.Id.ToString().Substring(0, 8)} بنجاح. تم خصم {deductionPercentage}% وسيتم استرداد {refundAmount:F2} د.ك خلال أيام. شكراً لك! 🚂";
+            var cancelMsg = $"تم إلغاء حجزك رقم {booking.Id.ToString().Substring(0, 8)} بنجاح. تم خصم {deductionPercentage}% وسيتم استرداد {refundAmount:F2} EGP خلال أيام. شكراً لك! 🚂";
             await _smsService.SendSmsAsync(booking.PassengerPhone, cancelMsg);
 
             return RedirectToAction(nameof(MyBookings));

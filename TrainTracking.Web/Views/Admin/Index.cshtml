@@ -12,7 +12,7 @@
         </div>
         <div class="text-end">
             <div class="badge bg-soft-primary text-primary rounded-pill px-3 py-2 fw-bold">
-                <i class="far fa-clock me-1"></i> تحديث تلقائي: @DateTime.Now.ToString("HH:mm")
+                <i class="far fa-clock me-1"></i> تحديث تلقائي: @DateTime.Now.ToString("hh:mm tt")
             </div>
         </div>
     </div>
@@ -174,7 +174,7 @@
                             <td class="px-3 py-3 text-center">
                                 <span class="badge bg-light text-dark border">@booking.SeatNumber</span>
                             </td>
-                            <td class="px-3 py-3 fw-bold text-primary">@booking.Price.ToString("N3") <span class="small font-normal text-muted">د.ك</span></td>
+                            <td class="px-3 py-3 fw-bold text-primary">@booking.Price.ToString("N3") <span class="small font-normal text-muted">EGP</span></td>
                             <td class="px-3 py-3">
                                 <span class="badge rounded-pill bg-soft-success text-success px-3 py-2">
                                     <i class="fas fa-check-circle me-1"></i> مؤكد
@@ -182,7 +182,7 @@
                             </td>
                             <td class="px-3 py-3 text-muted small">
                                 <div>@booking.BookingDate.ToString("dd/MM/yyyy")</div>
-                                <div>@booking.BookingDate.ToString("HH:mm")</div>
+                                <div>@booking.BookingDate.ToString("hh:mm tt")</div>
                             </td>
                         </tr>
                     }

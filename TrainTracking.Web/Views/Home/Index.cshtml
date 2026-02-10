@@ -21,19 +21,23 @@
 
         <!-- Unified Content Layer -->
         <div class="row justify-content-center w-100 hero-content-wrapper">
-            <div class="col-lg-10 text-center text-white animate-fade-up">
-                <div class="identity-badge-premium">
+            <div class="col-lg-10 col-11 text-center animate-fade-up px-3">
+                <div class="identity-badge-premium mb-3">
                     <i class="fas fa-train"></i> @Localizer["OfficialCarrier"]
                 </div>
-                <h1 class="premium-title">Welcome to Sikka</h1>
-                <p class="lead mb-5 opacity-90 fs-4 fw-light" style="max-width: 800px; margin: 0 auto 3rem;">@Localizer["HeroSubline"]</p>
+                <h1 class="premium-title mb-3">Welcome to Sikka</h1>
+                <p class="lead mb-4 opacity-90 hero-subtitle">@Localizer["HeroSubline"]</p>
                 
-                <div class="pt-2">
-                    <a asp-controller="Trips" asp-action="Index" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold shadow-lg hover-scale border-0" style="background: linear-gradient(45deg, #005eb8, #0088ff);">
-                        <i class="fas fa-search me-2"></i> @Localizer["BrowseTrips"]
+                <div class="pt-2 hero-buttons-wrapper">
+                    <a asp-controller="Trips" asp-action="Index" class="btn btn-primary btn-hero rounded-pill fw-bold shadow-lg hover-scale border-0">
+                        <i class="fas fa-satellite-dish me-2"></i>
+                        <span class="d-none d-sm-inline">@Localizer["BrowseTrips"]</span>
+                        <span class="d-inline d-sm-none">استعرض الرحلات</span>
                     </a>
-                    <a asp-controller="Trips" asp-action="Live" class="btn btn-outline-light btn-lg rounded-pill px-5 py-3 fw-bold ms-lg-3 mt-3 mt-lg-0 hover-scale backdrop-blur" style="border: 1px solid rgba(255,255,255,0.3);">
-                        <i class="fas fa-satellite-dish me-2"></i> @Localizer["LiveTracking"]
+                    <a asp-controller="Trips" asp-action="Live" class="btn btn-outline-light btn-hero rounded-pill fw-bold hover-scale backdrop-blur">
+                        <i class="fas fa-satellite-dish me-2"></i> 
+                        <span class="d-none d-sm-inline">@Localizer["LiveTracking"]</span>
+                        <span class="d-inline d-sm-none">LiveTracking</span>
                     </a>
                 </div>
             </div>

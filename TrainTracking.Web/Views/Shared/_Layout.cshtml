@@ -26,7 +26,9 @@
         if (userId != null)
         {
             var bookings = await BookingRepo.GetBookingsByUserIdAsync(userId);
-            points = (int)bookings.Where(b => b.Status == BookingStatus.Confirmed).Sum(b => b.Price * 10);
+            var earnedPoints = (int)bookings.Where(b => b.Status == BookingStatus.Confirmed).Sum(b => b.Price * 0.8m);
+            var redeemedPoints = await BookingRepo.GetRedeemedPointsAsync(userId);
+            points = earnedPoints - redeemedPoints;
         }
     }
 }
@@ -175,6 +177,15 @@
 
                 <!-- Navigation List -->
                 <div class="list-group list-group-flush py-2 text-@(isRTL ? "start" : "start")">
+                    <a asp-controller="Trips" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
+                        <div class="sidebar-icon-box @(isRTL ? "me-3" : "ms-3") text-primary"><i class="fas fa-calendar-alt"></i></div>
+                        @Localizer["Trips"]
+                    </a>
+                    <a asp-controller="Trips" asp-action="Live" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">
+                        <div class="sidebar-icon-box @(isRTL ? "me-1" : "ms-1") text-success"><i class="fas fa-satellite-dish"></i></div>
+                        @Localizer["LiveTracking"]
+                    </a>
+
                     @if (User.Identity?.IsAuthenticated == true)
                     {
                         <a asp-controller="Profile" asp-action="Index" class="list-group-item list-group-item-action border-0 py-3 px-4 d-flex align-items-center">

@@ -144,7 +144,7 @@ namespace TrainTracking.Web.Controllers
                 return Json(new { 
                     success = true, 
                     arrivalTime = arrivalTime.ToString("yyyy-MM-ddTHH:mm"),
-                    displayTime = arrivalTime.ToString("HH:mm")
+                    displayTime = arrivalTime.ToString("hh:mm tt")
                 });
             }
             catch (Exception ex)
@@ -174,7 +174,7 @@ namespace TrainTracking.Web.Controllers
                 var distanceKm = CalculateDistance(fromStation.Latitude, fromStation.Longitude, toStation.Latitude, toStation.Longitude);
 
                 // Calculate price Egyptian Pounds
-                const decimal ratePerKm = 0.5m;  // Example: 0.5 KD per km
+                const decimal ratePerKm = 0.5m;  // Example: 0.5 EGP per km
                 decimal calculatedPrice = (decimal)distanceKm * ratePerKm;
 
                 // Round to 3 decimal places
@@ -184,7 +184,7 @@ namespace TrainTracking.Web.Controllers
                 {
                     success = true,
                     arrivalTime = arrivalTime.ToString("yyyy-MM-ddTHH:mm"),
-                    displayTime = arrivalTime.ToString("HH:mm"),
+                    displayTime = arrivalTime.ToString("hh:mm tt"),
                     price = calculatedPrice  // رجع decimal كـ number
                 });
             }
@@ -287,8 +287,6 @@ namespace TrainTracking.Web.Controllers
             ViewBag.Trains = await _trainRepository.GetAllAsync();
             ViewBag.Stations = await _stationRepository.GetAllAsync();
 
-            // Note: Make sure the view name here is the name of the edit page
-            // If the page name is EditTrip.cshtml use this:
             return View("EditTrip", trip);
         }
         [HttpPost]

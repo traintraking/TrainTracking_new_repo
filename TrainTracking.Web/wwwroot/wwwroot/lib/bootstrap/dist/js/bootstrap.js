@@ -2717,7 +2717,7 @@
   const CLASS_NAME_SHOW$3 = 'show';
   const CLASS_NAME_SHOWING$1 = 'showing';
   const CLASS_NAME_HIDING = 'hiding';
-  const CLASS_NAME_BACKDROP = 'offcanvas-backdrop';
+  const CLASS_NAME_BACEGPROP = 'offcanvas-backdrop';
   const OPEN_SELECTOR = '.offcanvas.show';
   const EVENT_SHOW$3 = `show${EVENT_KEY$3}`;
   const EVENT_SHOWN$3 = `shown${EVENT_KEY$3}`;
@@ -2840,7 +2840,7 @@
       // 'static' option will be translated to true, and booleans will keep their value
       const isVisible = Boolean(this._config.backdrop);
       return new Backdrop({
-        className: CLASS_NAME_BACKDROP,
+        className: CLASS_NAME_BACEGPROP,
         isVisible,
         isAnimated: true,
         rootElement: this._element.parentNode,

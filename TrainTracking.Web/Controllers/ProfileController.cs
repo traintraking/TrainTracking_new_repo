@@ -15,11 +15,13 @@ namespace TrainTracking.Web.Controllers
     {
         private readonly IUserService _userService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IBookingRepository _bookingRepository;
 
-        public ProfileController(IUserService userService, UserManager<ApplicationUser> userManager)
+        public ProfileController(IUserService userService, UserManager<ApplicationUser> userManager, IBookingRepository bookingRepository)
         {
             _userService = userService;
             _userManager = userManager;
+            _bookingRepository = bookingRepository;
         }
 
         // GET: Profile/Index
@@ -37,9 +39,18 @@ namespace TrainTracking.Web.Controllers
 
             if (user == null)
             {
-                // إذا لم يتم العثور على البروفايل (قد يحدث عند مسح قاعدة البيانات وبقاء الكوكيز)
+                // If profile not found (might happen if database is cleared but cookies remain)
                 return Content("User profile not found. Please log in again.");
             }
+
+            // Calculate dynamic points
+            var bookings = await _bookingRepository.GetBookingsByUserIdAsync(user.Id);
+            var earnedPoints = (int)bookings
+                .Where(b => b.Status == Domain.Enums.BookingStatus.Confirmed)
+                .Sum(b => b.Price * 0.8m);
+            
+            var redeemedPoints = await _bookingRepository.GetRedeemedPointsAsync(user.Id);
+            user.Points = earnedPoints - redeemedPoints;
 
             return View(user);
         }
@@ -61,7 +72,7 @@ namespace TrainTracking.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(ApplicationUser model, IFormFile? profilePicture)
         {
-            // نزيل التحقق من الحقول التي تدار بواسطة Identity مباشرة
+            // Remove validation for fields managed directly by Identity
             ModelState.Remove("UserName");
             ModelState.Remove("Email");
             ModelState.Remove("PasswordHash");
@@ -73,7 +84,7 @@ namespace TrainTracking.Web.Controllers
                     var user = await _userService.GetUserByIdAsync(model.Id);
                     if (user == null) return NotFound();
 
-                    // تحديث الحقول المسموح بتعديلها في البروفايل
+                    // Update fields allowed for modification in the profile
                     user.FullName = model.FullName;
                     user.NationalId = model.NationalId;
                     user.PhoneNumber = model.PhoneNumber;
@@ -84,7 +95,7 @@ namespace TrainTracking.Web.Controllers
                     user.DateOfBirth = model.DateOfBirth;
 
 
-                    // حفظ الصورة لو تم رفعها
+                    // Save image if uploaded
                     if (profilePicture != null && profilePicture.Length > 0)
                     {
                         var picturePath = await _userService.SaveProfilePictureAsync(profilePicture, model.Id, user.ProfilePicturePath);

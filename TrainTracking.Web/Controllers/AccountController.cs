@@ -72,7 +72,7 @@ namespace TrainTracking.Web.Controllers
             }
 
             // 2. Normal Login Flow
-            // نستخدم FirstOrDefaultAsync لتجنب خطأ "Sequence contains more than one element"
+            // we use FirstOrDefaultAsync to avoid the error "Sequence contains more than one element"
             var existingUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == loginDTO.UserNameOREmail || u.Email == loginDTO.UserNameOREmail);
 
             if (existingUser == null)
@@ -81,14 +81,14 @@ namespace TrainTracking.Web.Controllers
                 return View(loginDTO);
             }
 
-            // التأكد من تأكيد الإيميل للمستخدمين العاديين
+            // we use IsEmailConfirmedAsync to check if the user has confirmed their email
             if (!await _userManager.IsEmailConfirmedAsync(existingUser))
             {
                 ModelState.AddModelError(string.Empty, "برجاء تأكيد البريد الإلكتروني قبل تسجيل الدخول.");
                 return View(loginDTO);
             }
 
-            // تسجيل الدخول الطبيعي
+            // normal login
             var result = await _signInManager.PasswordSignInAsync(existingUser.UserName, loginDTO.Password, loginDTO.RememberMe, lockoutOnFailure: false);
 
             if (result.Succeeded)
@@ -189,7 +189,7 @@ namespace TrainTracking.Web.Controllers
             if (!ModelState.IsValid)
                 return View(resendEmailConfirmationDTO);
 
-            // نستخدم FirstOrDefault لتجنب خطأ "Sequence contains more than one element" في حال وجود تكرار
+            // we use FirstOrDefault to avoid the error "Sequence contains more than one element" in case of duplicates
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == resendEmailConfirmationDTO.UserNameOREmail || u.Email == resendEmailConfirmationDTO.UserNameOREmail);
 
             if (user is null)
@@ -218,25 +218,22 @@ namespace TrainTracking.Web.Controllers
 
         
 
-            // GET: Forget Password
             [HttpGet]
             public IActionResult ForgetPassword()
             {
                 return  View(new ForgetPasswordDTO());
             }
 
-            // POST: Forget Password
             [HttpPost]
             public async Task<IActionResult> ForgetPassword(ForgetPasswordDTO model)
             {
                 if (!ModelState.IsValid)
                     return View(model);
 
-                // البحث عن المستخدم باليوزر نيم أو البريد
+            
                 var user = await _userManager.FindByNameAsync(model.UserNameOREmail)
                            ?? await _userManager.FindByEmailAsync(model.UserNameOREmail);
 
-                // للحفاظ على الخصوصية: لو المستخدم مش موجود، ما تقولش حاجة
                 if (user != null)
                 {
                     var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -259,7 +256,6 @@ namespace TrainTracking.Web.Controllers
                 return RedirectToAction("Login");
             }
 
-            // GET: Reset Password
             [HttpGet]
             public IActionResult ResetPassword(string userId, string token)
             {
@@ -272,7 +268,6 @@ namespace TrainTracking.Web.Controllers
                 return View(new ResetPasswordDTO { UserId = userId, Token = token });
             }
 
-            // POST: Reset Password
             [HttpPost]
             public async Task<IActionResult> ResetPassword(ResetPasswordDTO model)
             {

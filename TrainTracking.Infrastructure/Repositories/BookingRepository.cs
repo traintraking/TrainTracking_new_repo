@@ -65,9 +65,9 @@ namespace TrainTracking.Infrastructure.Repositories
                 .Include(b => b.Trip)
                     .ThenInclude(t => t.Train)
                 .Include(b => b.Trip)
-                    .ThenInclude(t => t.FromStation)
-                .Include(b => b.Trip)
                     .ThenInclude(t => t.ToStation)
+                .Include(b => b.FromStation)
+                .Include(b => b.ToStation)
                 .FirstOrDefaultAsync(b => b.Id == id);
         }
 
@@ -77,9 +77,9 @@ namespace TrainTracking.Infrastructure.Repositories
                 .Include(b => b.Trip)
                     .ThenInclude(t => t.Train)
                 .Include(b => b.Trip)
-                    .ThenInclude(t => t.FromStation)
-                .Include(b => b.Trip)
                     .ThenInclude(t => t.ToStation)
+                .Include(b => b.FromStation)
+                .Include(b => b.ToStation)
                 .Where(b => b.UserId == userId)
                 .OrderByDescending(b => b.BookingDate)
                 .ToListAsync();

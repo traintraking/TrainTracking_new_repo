@@ -10,18 +10,25 @@
         max-height: 600px;
         overflow-y: auto;
         padding: 20px;
-        background: #f0f2f5;
+        background: var(--bg-color);
         border-radius: 20px;
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] .train-container {
+        background: rgba(15, 23, 42, 0.4);
     }
 
     .coach {
-        background: white;
-        border: 2px solid #dee2e6;
+        background: var(--card-bg);
+        border: 2px solid var(--border-color);
         border-radius: 15px;
         margin-bottom: 30px;
         padding: 20px;
         position: relative;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        box-shadow: var(--shadow-color);
+        transition: all 0.3s ease;
     }
 
         .coach::before, .coach::after {
@@ -30,7 +37,7 @@
             left: 50%;
             width: 40px;
             height: 10px;
-            background: #adb5bd;
+            background: var(--border-color);
             transform: translateX(-50%);
         }
 
@@ -47,7 +54,7 @@
     .coach-header {
         text-align: center;
         margin-bottom: 15px;
-        color: #6c757d;
+        color: var(--muted-text);
         font-weight: bold;
         font-size: 0.9rem;
         text-transform: uppercase;
@@ -66,14 +73,14 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        color: #dee2e6;
+        color: var(--border-color);
         font-size: 0.8rem;
     }
 
     .seat {
         width: 45px;
         height: 45px;
-        border: 2px solid #e9ecef;
+        border: 2px solid var(--border-color);
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -81,40 +88,48 @@
         cursor: pointer;
         transition: all 0.2s;
         font-weight: 600;
-        background: #fff;
+        background: var(--card-bg);
+        color: var(--text-color);
         font-size: 0.9rem;
     }
 
         .seat:hover:not(.taken) {
-            border-color: #0d6efd;
-            color: #0d6efd;
-            background: #f0f7ff;
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            background: rgba(0, 94, 184, 0.1);
             transform: scale(1.1);
         }
 
         .seat.selected {
-            background: #0d6efd;
+            background: var(--accent-color);
             color: white;
-            border-color: #0d6efd;
-            box-shadow: 0 0 10px rgba(13, 110, 253, 0.4);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 136, 255, 0.4);
         }
 
         .seat.taken {
-            background: #f8f9fa;
-            color: #dee2e6;
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--muted-text);
             cursor: not-allowed;
             border-style: dashed;
+            opacity: 0.5;
         }
+
+    [data-theme="dark"] .seat.taken {
+        background: rgba(255, 255, 255, 0.05);
+    }
 
     .legend {
         display: flex;
         justify-content: center;
         gap: 25px;
         padding: 15px;
-        background: white;
+        background: var(--card-bg);
         border-radius: 50px;
         margin-bottom: 25px;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-shadow: var(--shadow-color);
+        border: 1px solid var(--border-color);
+        flex-wrap: wrap;
     }
 
     .legend-item {
@@ -122,12 +137,22 @@
         align-items: center;
         gap: 8px;
         font-size: 0.85rem;
+        color: var(--text-color);
     }
 
     .dot {
         width: 14px;
         height: 14px;
         border-radius: 4px;
+    }
+
+    .dot-booked {
+        background: rgba(0, 0, 0, 0.05);
+        border: 1px dashed var(--border-color);
+    }
+
+    [data-theme="dark"] .dot-booked {
+        background: rgba(255, 255, 255, 0.05);
     }
 </style>
 
@@ -142,35 +167,49 @@
     <div class="row">
         <div class="col-md-8">
             <div class="legend">
-                <div class="legend-item"><div class="dot" style="border: 2px solid #e9ecef;"></div> متاح</div>
-                <div class="legend-item"><div class="dot" style="background: #0d6efd;"></div> اختيارك</div>
-                <div class="legend-item"><div class="dot" style="background: #f8f9fa; border: 1px dashed #dee2e6;"></div> محجوز</div>
+                <div class="legend-item"><div class="dot" style="border: 2px solid var(--border-color); background: var(--card-bg);"></div> متاح</div>
+                <div class="legend-item"><div class="dot" style="background: var(--accent-color);"></div> اختيارك</div>
+                <div class="legend-item"><div class="dot dot-booked"></div> محجوز</div>
                 <div class="legend-item"><span class="badge bg-warning text-dark">VIP (2x)</span></div>
                 <div class="legend-item"><span class="badge bg-info text-dark">First Class (1.5x)</span></div>
             </div>
 
-            <div class="card shadow-sm border-0 mb-4 rounded-4 overflow-hidden">
-                <div class="card-header bg-primary text-white py-3">
-                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i> تفاصيل المقطع المختار</h5>
+            <div class="card shadow-sm border-0 mb-4 rounded-4 overflow-hidden bg-card">
+                <div class="card-header bg-primary text-white py-3 border-0">
+                    <h5 class="mb-0 fw-bold"><i class="fas fa-info-circle me-2"></i> تفاصيل المقطع المختار</h5>
                 </div>
                 <div class="card-body">
                     <div class="row align-items-center text-center">
                         <div class="col-5">
-                            <div class="fw-bold text-primary fs-5">@ViewBag.FromStation.Name</div>
-                            <div class="text-muted small">@(((DateTimeOffset)ViewBag.SegmentDepartureTime).ToString("yyyy-MM-dd"))</div>
-                            <div class="fs-4 fw-bold">@(((DateTimeOffset)ViewBag.SegmentDepartureTime).ToString("HH:mm"))</div>
+                            <div class="fw-bold text-primary fs-5">
+                                @ViewBag.FromStation.Name
+                            </div>
+                            <div class="text-muted small">
+                                @(((DateTimeOffset)ViewBag.SegmentDepartureTime).ToString("yyyy-MM-dd"))
+                            </div>
+                            <div class="fs-4 fw-bold text-muted">
+                                @(((DateTimeOffset)ViewBag.SegmentDepartureTime).ToString("hh:mm tt"))
+                            </div>
                         </div>
+
                         <div class="col-2">
                             <i class="fas fa-long-arrow-alt-left fa-2x text-muted"></i>
                         </div>
+
                         <div class="col-5">
-                            <div class="fw-bold text-danger fs-5">@ViewBag.ToStation.Name</div>
-                            <div class="text-muted small">@(((DateTimeOffset)ViewBag.SegmentArrivalTime).ToString("yyyy-MM-dd"))</div>
-                            <div class="fs-4 fw-bold">@(((DateTimeOffset)ViewBag.SegmentArrivalTime).ToString("HH:mm"))</div>
+                            <div class="fw-bold text-danger fs-5">
+                                @ViewBag.ToStation.Name
+                            </div>
+                            <div class="text-muted small">
+                                @(((DateTimeOffset)ViewBag.SegmentArrivalTime).ToString("yyyy-MM-dd"))
+                            </div>
+                            <div class="fs-4 fw-bold text-muted">
+                                @(((DateTimeOffset)ViewBag.SegmentArrivalTime).ToString("hh:mm tt"))
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+             </div>
 
             <div class="train-container">
                 @for (int c = 0; c < ViewBag.totalSeats / 20; c++)
@@ -214,8 +253,8 @@
         </div>
 
         <div class="col-md-4">
-            <div class="card shadow-sm border-0 p-4 sticky-top" style="top: 20px; border-radius: 15px;">
-                <h5 class="fw-bold mb-4 text-secondary">بيانات الحجز</h5>
+            <div class="card shadow-sm border-0 p-4 sticky-top bg-card" style="top: 20px; border-radius: 15px; border: 1px solid var(--border-color) !important;">
+                <h5 class="fw-bold mb-4 text-adaptive">بيانات الحجز</h5>
                 <form asp-action="Create" method="post" id="bookingForm">
                     <input type="hidden" asp-for="TripId" />
                     <input type="hidden" asp-for="FromStationId" />
@@ -229,16 +268,16 @@
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold" style="color:#6c757d;">رقم الهاتف</label>
-                        <input asp-for="PassengerPhone" class="form-control" placeholder="00000000" value="@ViewBag.UserPhone" />
+                        <input asp-for="PassengerPhone" class="form-control" placeholder="01XXXXXXXXX" value="@ViewBag.UserPhone" type="tel" pattern="[0-9]{11}" maxlength="11" minlength="11" required /> 
                     </div>
 
-                    <div class="p-3 bg-light rounded-3 mb-4">
+                    <div class="p-3 bg-light-adaptive rounded-3 mb-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">المقاعد:</span>
                             <span id="txtSeats" class="fw-bold text-primary">--</span>
                         </div>
                         <div class="d-flex justify-content-between border-top pt-2">
-                            <span class="fw-bold">الإجمالي:</span>
+                            <span class="fw-bold text-muted">الإجمالي:</span>
                             <span class="fw-bold text-success">EGP <span id="txtTotal">0.000</span></span>
                         </div>
                     </div>
