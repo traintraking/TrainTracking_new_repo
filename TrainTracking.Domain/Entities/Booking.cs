@@ -24,5 +24,7 @@ namespace TrainTracking.Domain.Entities
 
         public Guid ToStationId { get; set; }
         public Station ToStation { get; set; } = null!;
+
+        public decimal AppliedDiscount { get; set; } = 0;
     }
 }

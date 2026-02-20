@@ -104,6 +104,7 @@ namespace TrainTracking.Web.Controllers
 
             ViewBag.HasValidPhone = hasPhone;
             ViewBag.UserPhone = hasPhone ? user!.PhoneNumber : "";
+            ViewBag.RewardTicketsCount = user?.RewardTicketsCount ?? 0;
 
             var booking = new Booking
             {
@@ -126,7 +127,7 @@ namespace TrainTracking.Web.Controllers
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Booking booking, string selectedSeats)
+        public async Task<IActionResult> Create(Booking booking, string selectedSeats, bool useRewardTicket = false)
         {
             ModelState.Remove("Trip");
             ModelState.Remove("UserId");
@@ -162,39 +163,83 @@ namespace TrainTracking.Web.Controllers
                     var createdBookingIds = new List<Guid>();
                     decimal segmentBasePrice = await _virtualSegmentService.CalculatePriceAsync(trip!, fromStation!, toStation!);
 
-                    foreach (var seat in seatNumbers)
-                    {
-                        var newBooking = new Booking
-                        {
-                            Id = Guid.NewGuid(),
-                            TripId = booking.TripId,
-                            FromStationId = booking.FromStationId,
-                            ToStationId = booking.ToStationId,
-                            PassengerName = booking.PassengerName,
-                            PassengerPhone = booking.PassengerPhone,
-                            SeatNumber = seat,
-                            Price = CalculateSeatPrice(seat, segmentBasePrice),
-                            UserId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "Guest",
-                            Status = BookingStatus.PendingPayment,
-                            BookingDate = DateTimeOffset.Now
-                        };
+                    // Check if the user already has a pending booking for this specific trip
+                    var userBookings = await _bookingRepository.GetBookingsByUserIdAsync(userId!);
+                    bool hasPendingTripBooking = userBookings.Any(b => b.TripId == booking.TripId && b.Status == BookingStatus.PendingPayment);
 
-                        await _bookingRepository.CreateAsync(newBooking);
-                        createdBookingIds.Add(newBooking.Id);
+                    if (hasPendingTripBooking)
+                    {
+                        ModelState.AddModelError("", "عذراً، لديك بالفعل حجز معلق لهذه الرحلة. يرجى التوجه لصفحة 'حجوزاتي' لإتمام الدفع أو حذف الحجز القديم قبل إجراء حجز جديد.");
                     }
 
-                    string idsString = string.Join(",", createdBookingIds);
-                    return RedirectToAction("Payment", new { ids = idsString });
+                    bool rewardUsed = false;
+                    if (useRewardTicket && user != null && user.RewardTicketsCount > 0)
+                    {
+                         // Check if user already has a pending booking with discount to prevent double use while pending
+                        bool hasPendingDiscount = userBookings.Any(b => b.Status == BookingStatus.PendingPayment && b.AppliedDiscount > 0);
+                        
+                        if (hasPendingDiscount)
+                        {
+                            ModelState.AddModelError("", "لديك بالفعل حجز معلق يستخدم تذكرة خصم. يرجى إتمام الدفع أو حذفه أولاً لاستخدام تذكرة أخرى.");
+                        }
+                        else
+                        {
+                            rewardUsed = true;
+                        }
+                    }
+
+                    if (ModelState.IsValid)
+                    {
+                        foreach (var seat in seatNumbers)
+                        {
+                            var seatPrice = CalculateSeatPrice(seat, segmentBasePrice);
+                            var appliedDiscount = 0m;
+
+                            if (rewardUsed)
+                            {
+                                appliedDiscount = 50m;
+                                seatPrice = Math.Max(0, seatPrice - 50m);
+                                rewardUsed = false; // Only apply to the first seat
+                            }
+
+                            var newBooking = new Booking
+                            {
+                                Id = Guid.NewGuid(),
+                                TripId = booking.TripId,
+                                FromStationId = booking.FromStationId,
+                                ToStationId = booking.ToStationId,
+                                PassengerName = booking.PassengerName,
+                                PassengerPhone = booking.PassengerPhone,
+                                SeatNumber = seat,
+                                Price = seatPrice,
+                                AppliedDiscount = appliedDiscount,
+                                UserId = userId ?? "Guest",
+                                Status = BookingStatus.PendingPayment,
+                                BookingDate = DateTimeOffset.Now
+                            };
+
+                            await _bookingRepository.CreateAsync(newBooking);
+                            createdBookingIds.Add(newBooking.Id);
+                        }
+
+                        string idsString = string.Join(",", createdBookingIds);
+                        return RedirectToAction("Payment", new { ids = idsString });
+                    }
                 }
             }
 
             if (trip != null)
             {
                 booking.Trip = trip;
+                ViewBag.totalSeats = trip.Train?.TotalSeats ?? 0;
+                ViewBag.SegmentDepartureTime = await _virtualSegmentService.CalculateDepartureTimeAsync(trip, fromStation!);
+                ViewBag.SegmentArrivalTime = await _virtualSegmentService.CalculateArrivalTimeAsync(trip, toStation!);
             }
             ViewBag.TakenSeats = await _bookingRepository.GetTakenSeatsAsync(booking.TripId, booking.FromStationId, booking.ToStationId);
             ViewBag.FromStation = fromStation;
             ViewBag.ToStation = toStation;
+            ViewBag.UserPhone = user?.PhoneNumber ?? "";
+            ViewBag.RewardTicketsCount = user?.RewardTicketsCount ?? 0;
             return View(booking);
         }
 
@@ -275,6 +320,18 @@ namespace TrainTracking.Web.Controllers
             foreach (var booking in confirmedBookings)
             {
                 booking.Status = BookingStatus.Confirmed;
+                
+                // FINAL DEDUCTION: If a reward ticket was used, decrement the count now
+                if (booking.AppliedDiscount > 0)
+                {
+                    var user = await _userManager.FindByIdAsync(booking.UserId);
+                    if (user != null && user.RewardTicketsCount > 0)
+                    {
+                        user.RewardTicketsCount--;
+                        await _userManager.UpdateAsync(user);
+                    }
+                }
+
                 await _bookingRepository.UpdateAsync(booking);
             }
 
@@ -351,7 +408,10 @@ namespace TrainTracking.Web.Controllers
                 .Sum(b => b.Price * 0.8m);
             
             var redeemedPoints = await _bookingRepository.GetRedeemedPointsAsync(userId);
+            
+            var user = await _userManager.FindByIdAsync(userId);
             ViewBag.TotalPoints = earnedPoints - redeemedPoints;
+            ViewBag.RewardTicketsCount = user?.RewardTicketsCount ?? 0;
 
             return View(bookings);
         }
@@ -368,8 +428,10 @@ namespace TrainTracking.Web.Controllers
             var earnedPoints = (int)confirmedBookings.Sum(b => b.Price * 0.8m);
             var redeemedPoints = await _bookingRepository.GetRedeemedPointsAsync(userId);
             
+            var user = await _userManager.FindByIdAsync(userId);
             ViewBag.TotalPoints = earnedPoints - redeemedPoints;
             ViewBag.ConfirmedBookings = confirmedBookings;
+            ViewBag.RewardTicketsCount = user?.RewardTicketsCount ?? 0;
 
             return View();
         }
@@ -406,8 +468,16 @@ namespace TrainTracking.Web.Controllers
             };
 
             await _bookingRepository.CreateRedemptionAsync(redemption);
+            
+            // Increment user's reward ticket count
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user != null)
+            {
+                user.RewardTicketsCount++;
+                await _userManager.UpdateAsync(user);
+            }
 
-            TempData["Success"] = "تهانينا! لقد قمت بتحويل 200 نقطة إلى تذكرة مجانية بنجاح. تم خصم النقاط من رصيدك.";
+            TempData["Success"] = "تهانينا! لقد قمت بتحويل 200 نقطة إلى تذكرة خصم 50 جنيه بنجاح. تم خصم النقاط من رصيدك.";
             
             return RedirectToAction(nameof(Rewards));
         }

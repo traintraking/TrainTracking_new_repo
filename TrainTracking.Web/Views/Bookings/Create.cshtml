@@ -271,10 +271,30 @@
                         <input asp-for="PassengerPhone" class="form-control" placeholder="01XXXXXXXXX" value="@ViewBag.UserPhone" type="tel" pattern="[0-9]{11}" maxlength="11" minlength="11" required /> 
                     </div>
 
+                    @if (ViewBag.RewardTicketsCount > 0)
+                    {
+                        <div class="p-3 bg-warning-subtle border border-warning rounded-3 mb-3" style="background-color: rgba(255, 193, 7, 0.1);">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <i class="fas fa-ticket-alt text-warning me-2"></i>
+                                    <span class="fw-bold text-dark-emphasis">لديك @ViewBag.RewardTicketsCount تذكرة خصم</span>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" name="useRewardTicket" id="useRewardTicket" value="true">
+                                    <label class="form-check-label small" for="useRewardTicket">استخدام (خصم 50ج)</label>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
                     <div class="p-3 bg-light-adaptive rounded-3 mb-4">
                         <div class="d-flex justify-content-between mb-2">
                             <span class="text-muted">المقاعد:</span>
                             <span id="txtSeats" class="fw-bold text-primary">--</span>
+                        </div>
+                        <div id="discountRow" class="d-flex justify-content-between mb-2 d-none">
+                            <span class="text-danger">خصم تذكرة مكافأة:</span>
+                            <span class="fw-bold text-danger">-50.000 EGP</span>
                         </div>
                         <div class="d-flex justify-content-between border-top pt-2">
                             <span class="fw-bold text-muted">الإجمالي:</span>
@@ -297,6 +317,11 @@
     const unitPriceElement = document.getElementById('unitPrice');
     const basePrice = parseFloat(unitPriceElement.value) || 0;
     console.log("Base Price Detected:", basePrice);
+    const useTicketCheckbox = document.getElementById('useRewardTicket');
+    if (useTicketCheckbox) {
+        useTicketCheckbox.addEventListener('change', updateBookingInfo);
+    }
+
     function selectSeat(el, num) {
         if (el.classList.contains('taken')) return;
         const multiplier = parseFloat(el.getAttribute('data-multiplier'));
@@ -315,13 +340,27 @@
         updateBookingInfo();
     }
     function updateBookingInfo() {
-        const seatNumbers = selectedSeats.map(s => s.num);  // هنا التصحيح
+        const seatNumbers = selectedSeats.map(s => s.num);  
         document.getElementById('txtSeats').innerText = seatNumbers.length > 0 ? seatNumbers.join(', ') : "--";
         document.getElementById('selectedSeatsInput').value = seatNumbers.join(',');
+        
         let total = 0;
         selectedSeats.forEach(s => {
             total += (basePrice * s.mult);
         });
+
+        const discountRow = document.getElementById('discountRow');
+        if (useTicketCheckbox && useTicketCheckbox.checked) {
+            if (total > 0) {
+                total = Math.max(0, total - 50);
+                discountRow?.classList.remove('d-none');
+            } else {
+                discountRow?.classList.add('d-none');
+            }
+        } else {
+            discountRow?.classList.add('d-none');
+        }
+
         document.getElementById('txtTotal').innerText = total.toFixed(3);
         document.getElementById('btnSubmit').disabled = selectedSeats.length === 0;
     }

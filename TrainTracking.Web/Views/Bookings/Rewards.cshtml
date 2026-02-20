@@ -43,9 +43,15 @@
                         <div class="card-holder">@User.Identity?.Name</div>
                         <div class="card-points-label">عضو بلاتيني</div>
                     </div>
-                    <div class="text-end">
-                        <div class="card-points-label">رصيد النقاط</div>
-                        <div class="card-points-value">@totalPoints.ToString("N0")</div>
+                    <div class="d-flex text-end">
+                        <div class="me-4 text-center">
+                            <div class="card-points-label">تذاكر الخصم</div>
+                            <div class="card-points-value fw-bold">@ViewBag.RewardTicketsCount</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="card-points-label">رصيد النقاط</div>
+                            <div class="card-points-value">@totalPoints.ToString("N0")</div>
+                        </div>
                     </div>
                 </div>
                 <div class="visa-card-bg-decoration"></div>
@@ -54,7 +60,7 @@
             <!-- Redemption Box -->
             <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
                 <h5 class="fw-bold mb-3">تحويل النقاط لتذاكر</h5>
-                <p class="small text-muted mb-4">كل 200 نقطه تمنحك خصم 50% بحد اقصي (50 EGP) للرحله الي تحتارها انت .</p>
+                <p class="small text-muted mb-4">كل 200 نقطة تمنحك تذكرة خصم بقيمة 50 جنيه لأي رحلة تختارها.</p>
                 
                 <div class="d-flex align-items-center mb-4">
                     <div class="flex-grow-1">
@@ -72,7 +78,7 @@
 
                 <form asp-action="RedeemPoints" method="post">
                     <button type="submit" class="btn @(totalPoints >= 200 ? "btn-primary" : "btn-secondary disabled") w-100 rounded-pill py-3 fw-bold shadow-sm transition-all" @(totalPoints < 200 ? "disabled" : "")>
-                        <i class="fas fa-ticket-alt me-2"></i> استبدال بـ تذكرة مجانية
+                        <i class="fas fa-ticket-alt me-2"></i> استبدال بـ تذكرة خصم 50 جنيه
                     </button>
                     @if (totalPoints < 200)
                     {

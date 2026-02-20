@@ -38,5 +38,6 @@ namespace TrainTracking.Domain.Entities
         public bool IsActive { get; set; } = true;
         
         public int Points { get; set; } = 0;
+        public int RewardTicketsCount { get; set; } = 0;
     }
 }

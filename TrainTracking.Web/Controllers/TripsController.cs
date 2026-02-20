@@ -86,7 +86,7 @@ namespace TrainTracking.Web.Controllers
                     .OrderBy(t => t.DepartureTime)
                     .ToList();
 
-                ViewBag.DebugInfo = $"Current (Kuwait): {now:yyyy-MM-dd HH:mm:ss} | Trips from today: {liveTrips.Count}";
+                ViewBag.DebugInfo = $"Current (Egypt): {now:yyyy-MM-dd HH:mm:ss} | Trips from today: {liveTrips.Count}";
 
                 return View(liveTrips);
             }
